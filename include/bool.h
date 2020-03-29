@@ -1,6 +1,8 @@
 #ifndef EGOISTICOS_BOOL_H
 #define EGOISTICOS_BOOL_H
 
+typedef uint8_t bool;
+
 #define false   0
 #define true    1
 

@@ -102,5 +102,54 @@ typedef UINT64 EFI_PHYSICAL_ADDRESS;
 #define EFI_BACKGROUND_BROWN 0x60
 #define EFI_BACKGROUND_LIGHTGRAY 0x70
 
+//*******************************************************
+//EFI_VIRTUAL_ADDRESS
+//*******************************************************
+typedef UINT64 EFI_VIRTUAL_ADDRESS;
+
+//*******************************************************
+//EFI_STATUS Success Codes (High Bit Clear)
+//*******************************************************
+#define EFI_SUCCESS 0
+
+//*******************************************************
+//EFI_STATUS Error Codes (High Bit Set)
+//*******************************************************
+#define EFI_ERROR 0x8000000000000000U
+
+#define EFI_LOAD_ERROR (EFI_ERROR | 1U)
+#define EFI_INVALID_PARAMETER (EFI_ERROR | 2U)
+#define EFI_UNSUPPORTED (EFI_ERROR | 3U)
+#define EFI_BAD_BUFFER_SIZE (EFI_ERROR | 4U)
+#define EFI_BUFFER_TOO_SMALL (EFI_ERROR | 5U)
+#define EFI_NOT_READY (EFI_ERROR | 6U)
+#define EFI_DEVICE_ERROR (EFI_ERROR | 7U)
+#define EFI_WRITE_PROTECTED (EFI_ERROR | 8U)
+#define EFI_OUT_OF_RESOURCES (EFI_ERROR | 9U)
+#define EFI_VOLUME_CORRUPTED (EFI_ERROR | 10U)
+#define EFI_VOLUME_FULL (EFI_ERROR | 11U)
+#define EFI_NO_MEDIA (EFI_ERROR | 12U)
+#define EFI_MEDIA_CHANGED (EFI_ERROR | 13U)
+#define EFI_NOT_FOUND (EFI_ERROR | 14U)
+#define EFI_ACCESS_DENIED (EFI_ERROR | 15U)
+#define EFI_NO_RESPONSE (EFI_ERROR | 16U)
+#define EFI_NO_MAPPING (EFI_ERROR | 17U)
+#define EFI_TIMEOUT (EFI_ERROR | 18U)
+#define EFI_NOT_STARTED (EFI_ERROR | 19U)
+#define EFI_ALREADY_STARTED (EFI_ERROR | 20U)
+#define EFI_ABORTED (EFI_ERROR | 21U)
+#define EFI_ICMP_ERROR (EFI_ERROR | 22U)
+#define EFI_TFTP_ERROR (EFI_ERROR | 23U)
+#define EFI_PROTOCOL_ERROR (EFI_ERROR | 24U)
+#define EFI_INCOMPATIBLE_VERSION (EFI_ERROR | 25U)
+#define EFI_SECURITY_VIOLATION (EFI_ERROR | 26U)
+#define EFI_CRC_ERROR (EFI_ERROR | 27U)
+#define EFI_END_OF_MEDIA (EFI_ERROR | 28U)
+#define EFI_END_OF_FILE (EFI_ERROR | 31U)
+#define EFI_INVALID_LANGUAGE (EFI_ERROR | 32U)
+#define EFI_COMPROMISED_DATA (EFI_ERROR | 33U)
+#define EFI_IP_ADDRESS_CONFLICT (EFI_ERROR | 34U)
+#define EFI_HTTP_ERROR (EFI_ERROR | 35U)
+
 
 #endif //EGOISTICOS_EFICONST_H

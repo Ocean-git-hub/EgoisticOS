@@ -3,7 +3,7 @@
 
 #include <int.h>
 
-#define    EFIAPI
+#define EFIAPI
 #define OUT
 #define IN
 #define OPTIONAL
@@ -21,7 +21,7 @@ typedef uint32_t UINT32;
 typedef int64_t INT64;
 typedef uint64_t UINT64;
 typedef int8_t CHAR8;
-typedef int16_t CHAR16;
+typedef uint16_t CHAR16;
 typedef void VOID;
 typedef struct {
     UINT32 Data1;
