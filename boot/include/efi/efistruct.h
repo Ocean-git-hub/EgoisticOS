@@ -4,6 +4,13 @@
 #include "efidef.h"
 #include "eficonst.h"
 
+typedef struct {
+    UINT32 Data1;
+    UINT16 Data2;
+    UINT16 Data3;
+    UINT8 Data4[8];
+} EFI_GUID;
+
 typedef struct EFI_GRAPHICS_OUTPUT_PROTOCOL {
 //    EFI_GRAPHICS_OUTPUT_PROTOCOL_QUERY_MODE QueryMode;
 //    EFI_GRAPHICS_OUTPUT_PROTOCOL_SET_MODE SetMode;
@@ -598,5 +605,133 @@ typedef struct {
         VOID *VendorTable;
     } *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
+
+typedef struct _EFI_DEVICE_PATH_TO_TEXT_PROTOCOL {
+    CHAR16 *(EFIAPI *EFI_DEVICE_PATH_TO_TEXT_NODE)(
+            IN CONST EFI_DEVICE_PATH_PROTOCOL *DeviceNode,
+            IN BOOLEAN DisplayOnly,
+            IN BOOLEAN AllowShortcuts
+    );
+
+    CHAR16 *(EFIAPI *EFI_DEVICE_PATH_TO_TEXT_PATH)(
+            IN CONST EFI_DEVICE_PATH_PROTOCOL *DevicePath,
+            IN BOOLEAN DisplayOnly,
+            IN BOOLEAN AllowShortcuts
+    );
+
+} EFI_DEVICE_PATH_TO_TEXT_PROTOCOL;
+
+typedef struct {
+    EFI_EVENT Event;
+    EFI_STATUS Status;
+    UINTN BufferSize;
+    VOID *Buffer;
+} EFI_FILE_IO_TOKEN;
+
+typedef struct _EFI_FILE_PROTOCOL {
+    UINT64 Revision;
+
+    EFI_STATUS (EFIAPI *EFI_FILE_OPEN)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            OUT struct _EFI_FILE_PROTOCOL **NewHandle,
+            IN CHAR16 *FileName,
+            IN UINT64 OpenMode,
+            IN UINT64 Attributes
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_CLOSE)(
+            IN struct _EFI_FILE_PROTOCOL *This
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_DELETE)(
+            IN struct _EFI_FILE_PROTOCOL *This
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_READ)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN OUT UINTN *BufferSize,
+            OUT VOID *Buffer
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_WRITE)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN OUT UINTN *BufferSize,
+            IN VOID *Buffer
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_GET_POSITION)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            OUT UINT64 *Position
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_SET_POSITION)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN UINT64 Position
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_GET_INFO)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN EFI_GUID *InformationType,
+            IN OUT UINTN *BufferSize,
+            OUT VOID *Buffer
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_SET_INFO)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN EFI_GUID *InformationType,
+            IN UINTN BufferSize,
+            IN VOID *Buffer
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_FLUSH)(
+            IN struct _EFI_FILE_PROTOCOL *This
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_OPEN_EX)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            OUT struct _EFI_FILE_PROTOCOL **NewHandle,
+            IN CHAR16 *FileName,
+            IN UINT64 OpenMode,
+            IN UINT64 Attributes,
+            IN OUT EFI_FILE_IO_TOKEN *Token
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_READ_EX)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN OUT EFI_FILE_IO_TOKEN *Token
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_WRITE_EX)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN OUT EFI_FILE_IO_TOKEN *Token
+    );
+
+    EFI_STATUS (EFIAPI *EFI_FILE_FLUSH_EX)(
+            IN struct _EFI_FILE_PROTOCOL *This,
+            IN OUT EFI_FILE_IO_TOKEN *Token
+    );
+
+} EFI_FILE_PROTOCOL;
+
+typedef struct _EFI_SIMPLE_FILE_SYSTEM_PROTOCOL {
+    UINT64 Revision;
+
+    EFI_STATUS (EFIAPI *EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_OPEN_VOLUME)(
+            IN struct _EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *This,
+            OUT EFI_FILE_PROTOCOL **Root
+    );
+
+} EFI_SIMPLE_FILE_SYSTEM_PROTOCOL;
+
+typedef struct {
+    UINT64 Size;
+    UINT64 FileSize;
+    UINT64 PhysicalSize;
+    EFI_TIME CreateTime;
+    EFI_TIME LastAccessTime;
+    EFI_TIME ModificationTime;
+    UINT64 Attribute;
+    CHAR16 FileName[];
+} EFI_FILE_INFO;
 
 #endif //EGOISTICOS_EFISTRUCT_H

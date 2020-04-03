@@ -23,16 +23,12 @@ typedef uint64_t UINT64;
 typedef int8_t CHAR8;
 typedef uint16_t CHAR16;
 typedef void VOID;
-typedef struct {
-    UINT32 Data1;
-    UINT16 Data2;
-    UINT16 Data3;
-    UINT8 Data4[8];
-} EFI_GUID;
 typedef UINTN EFI_STATUS;
 typedef void *EFI_HANDLE;
 typedef void *EFI_EVENT;
 typedef UINT64 EFI_LBA;
 typedef UINTN EFI_TPL;
+typedef UINT64 EFI_PHYSICAL_ADDRESS;
+typedef UINT64 EFI_VIRTUAL_ADDRESS;
 
 #endif //EGOISTICOS_EFIDEF_H

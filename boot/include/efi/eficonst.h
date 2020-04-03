@@ -3,7 +3,15 @@
 
 #include "efidef.h"
 
-typedef UINT64 EFI_PHYSICAL_ADDRESS;
+//*******************************************************
+// Event Types
+//*******************************************************
+#define EVT_TIMER 0x80000000
+#define EVT_RUNTIME 0x40000000
+#define EVT_NOTIFY_SIGNAL 0x00000100
+#define EVT_NOTIFY_WAIT 0x00000200
+#define EVT_SIGNAL_EXIT_BOOT_SERVICES 0x00000201
+#define EVT_SIGNAL_VIRTUAL_ADDRESS_CHANGE 0x60000202
 
 //*******************************************************
 // UNICODE DRAWING CHARACTERS
@@ -103,11 +111,6 @@ typedef UINT64 EFI_PHYSICAL_ADDRESS;
 #define EFI_BACKGROUND_LIGHTGRAY 0x70
 
 //*******************************************************
-//EFI_VIRTUAL_ADDRESS
-//*******************************************************
-typedef UINT64 EFI_VIRTUAL_ADDRESS;
-
-//*******************************************************
 //EFI_STATUS Success Codes (High Bit Clear)
 //*******************************************************
 #define EFI_SUCCESS 0
@@ -151,5 +154,63 @@ typedef UINT64 EFI_VIRTUAL_ADDRESS;
 #define EFI_IP_ADDRESS_CONFLICT (EFI_ERROR | 34U)
 #define EFI_HTTP_ERROR (EFI_ERROR | 35U)
 
+//*******************************************************
+//EFI Scan Codes
+//*******************************************************
+#define EFI_SCAN_CODE_UP 0x01
+#define EFI_SCAN_CODE_DOWN 0x02
+#define EFI_SCAN_CODE_PAGE_UP 0x09
+#define EFI_SCAN_CODE_PAGE_DOWN 0x0a
+#define EFI_SCAN_CODE_ESCAPE 0x17
+
+
+//*******************************************************
+// Open Modes
+//*******************************************************
+#define EFI_FILE_MODE_READ 0x0000000000000001
+#define EFI_FILE_MODE_WRITE 0x0000000000000002
+#define EFI_FILE_MODE_CREATE 0x8000000000000000
+
+//*******************************************************
+// File Attribute Bits
+//*******************************************************
+#define EFI_FILE_READ_ONLY 0x0000000000000001
+#define EFI_FILE_HIDDEN 0x0000000000000002
+#define EFI_FILE_SYSTEM 0x0000000000000004
+#define EFI_FILE_RESERVED 0x0000000000000008
+#define EFI_FILE_DIRECTORY 0x0000000000000010
+#define EFI_FILE_ARCHIVE 0x0000000000000020
+#define EFI_FILE_VALID_ATTR 0x0000000000000037
+
+//*******************************************************
+// System Table Revision
+//*******************************************************
+#define EFI_2_70_SYSTEM_TABLE_REVISION ((2U<<16U) | (70U))
+#define EFI_2_60_SYSTEM_TABLE_REVISION ((2U<<16U) | (60U))
+#define EFI_2_40_SYSTEM_TABLE_REVISION ((2U<<16U) | (40U))
+#define EFI_2_50_SYSTEM_TABLE_REVISION ((2U<<16U) | (50U))
+#define EFI_2_31_SYSTEM_TABLE_REVISION ((2U<<16U) | (31U))
+#define EFI_2_30_SYSTEM_TABLE_REVISION ((2U<<16U) | (30U))
+#define EFI_2_20_SYSTEM_TABLE_REVISION ((2U<<16U) | (20U))
+#define EFI_2_10_SYSTEM_TABLE_REVISION ((2U<<16U) | (10U))
+#define EFI_2_00_SYSTEM_TABLE_REVISION ((2U<<16U) | (00U))
+#define EFI_1_10_SYSTEM_TABLE_REVISION ((1U<<16U) | (10U))
+#define EFI_1_02_SYSTEM_TABLE_REVISION ((1U<<16U) | (02U))
+
+//*******************************************************
+// Memory Attribute Definitions
+//*******************************************************
+#define EFI_MEMORY_UC 0x0000000000000001
+#define EFI_MEMORY_WC 0x0000000000000002
+#define EFI_MEMORY_WT 0x0000000000000004
+#define EFI_MEMORY_WB 0x0000000000000008
+#define EFI_MEMORY_UCE 0x0000000000000010
+#define EFI_MEMORY_WP 0x0000000000001000
+#define EFI_MEMORY_RP 0x0000000000002000
+#define EFI_MEMORY_XP 0x0000000000004000
+#define EFI_MEMORY_NV 0x0000000000008000
+#define EFI_MEMORY_MORE_RELIABLE 0x0000000000010000
+#define EFI_MEMORY_RO 0x0000000000020000
+#define EFI_MEMORY_RUNTIME 0x8000000000000000
 
 #endif //EGOISTICOS_EFICONST_H
