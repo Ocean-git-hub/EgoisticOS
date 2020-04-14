@@ -11,7 +11,7 @@
 
 #define MAX_BUFFER_SIZE 50
 
-const char COMMAND_LINE_ARGUMENT[] = "qemu-system-x86_64 -m 4G -smp 4 -drive if=pflash,format=raw,file=./OVMF.fd -drive file=fat:rw:./fs,format=raw";
+const char COMMAND_LINE_ARGUMENT[] = "qemu-system-x86_64 -m 8G -smp 4 -drive if=pflash,format=raw,file=./OVMF.fd -drive file=fat:rw:./fs,format=raw";
 
 void copy_file(const char *in, const char *out) {
     int in_fd = open(in, O_RDONLY);
@@ -56,10 +56,12 @@ int execute_command(const char *command_line_argument) {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 3) {
-        printf("Usage: %s [EXEFILE] [OUTPUTFILE]\n", argv[0]);
+    if (argc <= 2) {
+        printf("Usage: %s [[EXEFILE] [OUTPUTFILE]]...\n", argv[0]);
         return -1;
     }
-    copy_file(argv[1], argv[2]);
+    for (int i = 0; i < argc - 1; i += 2)
+        copy_file(argv[1 + i], argv[2 + i]);
+
     return execute_command(COMMAND_LINE_ARGUMENT);
 }

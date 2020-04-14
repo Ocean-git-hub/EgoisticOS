@@ -1,4 +1,5 @@
 #include "include/string.h"
+#include "include/efi/efidef.h"
 
 void cat_string(CHAR16 *dest, CHAR16 *src) {
     for (; *dest != '\0'; dest++);

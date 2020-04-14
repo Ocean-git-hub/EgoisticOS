@@ -213,4 +213,14 @@
 #define EFI_MEMORY_RO 0x0000000000020000
 #define EFI_MEMORY_RUNTIME 0x8000000000000000
 
+//*******************************************************
+// Bit Definitions for EFI_TIME.Daylight. See below.
+//*******************************************************
+#define EFI_TIME_ADJUST_DAYLIGHT 0x01
+#define EFI_TIME_IN_DAYLIGHT 0x02
+//*******************************************************
+// Value Definition for EFI_TIME.TimeZone. See below.
+//*******************************************************
+#define EFI_UNSPECIFIED_TIMEZONE 0x07FF
+
 #endif //EGOISTICOS_EFICONST_H

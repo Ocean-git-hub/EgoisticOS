@@ -1,7 +1,7 @@
 #ifndef EGOISTICOS_EFIDEF_H
 #define EGOISTICOS_EFIDEF_H
 
-#include <int.h>
+#include <stdint.h>
 
 #define EFIAPI
 #define OUT
@@ -22,7 +22,7 @@ typedef int64_t INT64;
 typedef uint64_t UINT64;
 typedef int8_t CHAR8;
 typedef uint16_t CHAR16;
-typedef void VOID;
+typedef void EFI_VOID;
 typedef UINTN EFI_STATUS;
 typedef void *EFI_HANDLE;
 typedef void *EFI_EVENT;

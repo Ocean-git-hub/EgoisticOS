@@ -125,9 +125,9 @@ typedef enum {
     EfiMaxMemoryType
 } EFI_MEMORY_TYPE;
 
-typedef VOID(EFIAPI *EFI_EVENT_NOTIFY)(
+typedef EFI_VOID(EFIAPI *EFI_EVENT_NOTIFY)(
         IN EFI_EVENT Event,
-        IN VOID *Context
+        IN EFI_VOID *Context
 );
 
 typedef enum {
@@ -274,7 +274,7 @@ typedef struct {
 
         EFI_STATUS (EFIAPI *CONVERT_POINTER)(
                 IN UINTN DebugDisposition,
-                IN VOID **Address
+                IN EFI_VOID **Address
         );
 
         EFI_STATUS (EFIAPI *GET_VARIABLE)(
@@ -282,7 +282,7 @@ typedef struct {
                 IN EFI_GUID *VendorGuid,
                 OUT UINT32 *Attributes OPTIONAL,
                 IN OUT UINTN *DataSize,
-                OUT VOID *Data OPTIONAL
+                OUT EFI_VOID *Data OPTIONAL
         );
 
         EFI_STATUS (EFIAPI *GET_NEXT_VARIABLE_NAME)(
@@ -303,11 +303,11 @@ typedef struct {
                 OUT UINT32 *HighCount
         );
 
-        VOID (EFIAPI *EFI_RESET_SYSTEM)(
+        EFI_VOID (EFIAPI *EFI_RESET_SYSTEM)(
                 IN EFI_RESET_TYPE ResetType,
                 IN EFI_STATUS ResetStatus,
                 IN UINTN DataSize,
-                IN VOID *ResetData OPTIONAL
+                IN EFI_VOID *ResetData OPTIONAL
         );
 
         EFI_STATUS (EFIAPI *UPDATE_CAPSULE)(
@@ -338,7 +338,7 @@ typedef struct {
                 IN EFI_TPL NewTpl
         );
 
-        VOID (EFIAPI *EFI_RESTORE_TPL)(
+        EFI_VOID (EFIAPI *EFI_RESTORE_TPL)(
                 IN EFI_TPL OldTpl
         );
 
@@ -365,18 +365,18 @@ typedef struct {
         EFI_STATUS (EFIAPI *EFI_ALLOCATE_POOL)(
                 IN EFI_MEMORY_TYPE PoolType,
                 IN UINTN Size,
-                OUT VOID **Buffer
+                OUT EFI_VOID **Buffer
         );
 
         EFI_STATUS (EFIAPI *EFI_FREE_POOL)(
-                IN VOID *Buffer
+                IN EFI_VOID *Buffer
         );
 
         EFI_STATUS (EFIAPI *EFI_CREATE_EVENT)(
                 IN UINT32 Type,
                 IN EFI_TPL NotifyTpl,
                 IN EFI_EVENT_NOTIFY NotifyFunction, OPTIONAL
-                IN VOID *NotifyContext, OPTIONAL
+                IN EFI_VOID *NotifyContext, OPTIONAL
                 OUT EFI_EVENT *Event
         );
 
@@ -408,40 +408,40 @@ typedef struct {
                 IN OUT EFI_HANDLE *Handle,
                 IN EFI_GUID *Protocol,
                 IN EFI_INTERFACE_TYPE InterfaceType,
-                IN VOID *Interface
+                IN EFI_VOID *Interface
         );
 
         EFI_STATUS (EFIAPI *EFI_REINSTALL_PROTOCOL_INTERFACE)(
                 IN EFI_HANDLE Handle,
                 IN EFI_GUID *Protocol,
-                IN VOID *OldInterface,
-                IN VOID *NewInterface
+                IN EFI_VOID *OldInterface,
+                IN EFI_VOID *NewInterface
         );
 
         EFI_STATUS (EFIAPI *EFI_UNINSTALL_PROTOCOL_INTERFACE)(
                 IN EFI_HANDLE Handle,
                 IN EFI_GUID *Protocol,
-                IN VOID *Interface
+                IN EFI_VOID *Interface
         );
 
         EFI_STATUS (EFIAPI *EFI_HANDLE_PROTOCOL)(
                 IN EFI_HANDLE Handle,
                 IN EFI_GUID *Protocol,
-                OUT VOID **Interface
+                OUT EFI_VOID **Interface
         );
 
-        VOID *Reserved;
+        EFI_VOID *Reserved;
 
         EFI_STATUS (EFIAPI *EFI_REGISTER_PROTOCOL_NOTIFY)(
                 IN EFI_GUID *Protocol,
                 IN EFI_EVENT Event,
-                OUT VOID **Registration
+                OUT EFI_VOID **Registration
         );
 
         EFI_STATUS (EFIAPI *EFI_LOCATE_HANDLE)(
                 IN EFI_LOCATE_SEARCH_TYPE SearchType,
                 IN EFI_GUID *Protocol OPTIONAL,
-                IN VOID *SearchKey OPTIONAL,
+                IN EFI_VOID *SearchKey OPTIONAL,
                 IN OUT UINTN *BufferSize,
                 OUT EFI_HANDLE *Buffer
         );
@@ -454,14 +454,14 @@ typedef struct {
 
         EFI_STATUS (EFIAPI *EFI_INSTALL_CONFIGURATION_TABLE)(
                 IN EFI_GUID *Guid,
-                IN VOID *Table
+                IN EFI_VOID *Table
         );
 
         EFI_STATUS (EFIAPI *EFI_IMAGE_LOAD)(
                 IN BOOLEAN BootPolicy,
                 IN EFI_HANDLE ParentImageHandle,
                 IN EFI_DEVICE_PATH_PROTOCOL *DevicePath,
-                IN VOID *SourceBuffer OPTIONAL,
+                IN EFI_VOID *SourceBuffer OPTIONAL,
                 IN UINTN SourceSize,
                 OUT EFI_HANDLE *ImageHandle
         );
@@ -520,7 +520,7 @@ typedef struct {
         EFI_STATUS (EFIAPI *EFI_OPEN_PROTOCOL)(
                 IN EFI_HANDLE Handle,
                 IN EFI_GUID *Protocol,
-                OUT VOID **Interface OPTIONAL,
+                OUT EFI_VOID **Interface OPTIONAL,
                 IN EFI_HANDLE AgentHandle,
                 IN EFI_HANDLE ControllerHandle,
                 IN UINT32 Attributes
@@ -549,15 +549,15 @@ typedef struct {
         EFI_STATUS (EFIAPI *EFI_LOCATE_HANDLE_BUFFER)(
                 IN EFI_LOCATE_SEARCH_TYPE SearchType,
                 IN EFI_GUID *Protocol OPTIONAL,
-                IN VOID *SearchKey OPTIONAL,
+                IN EFI_VOID *SearchKey OPTIONAL,
                 IN OUT UINTN *NoHandles,
                 OUT EFI_HANDLE **Buffer
         );
 
         EFI_STATUS (EFIAPI *EFI_LOCATE_PROTOCOL)(
                 IN EFI_GUID *Protocol,
-                IN VOID *Registration   OPTIONAL,
-                OUT VOID **Interface
+                IN EFI_VOID *Registration   OPTIONAL,
+                OUT EFI_VOID **Interface
         );
 
         EFI_STATUS (EFIAPI *EFI_INSTALL_MULTIPLE_PROTOCOL_INTERFACES)(
@@ -571,20 +571,20 @@ typedef struct {
         );
 
         EFI_STATUS (EFIAPI *EFI_CALCULATE_CRC32)(
-                IN VOID *Data,
+                IN EFI_VOID *Data,
                 IN UINTN
                 DataSize,
                 OUT UINT32 *Crc32
         );
 
-        VOID (EFIAPI *EFI_COPY_MEM)(
-                IN VOID *Destination,
-                IN VOID *Source,
+        EFI_VOID (EFIAPI *EFI_COPY_MEM)(
+                IN EFI_VOID *Destination,
+                IN EFI_VOID *Source,
                 IN UINTN Length
         );
 
-        VOID (EFIAPI *EFI_SET_MEM)(
-                IN VOID *Buffer,
+        EFI_VOID (EFIAPI *EFI_SET_MEM)(
+                IN EFI_VOID *Buffer,
                 IN UINTN Size,
                 IN UINT8 Value
         );
@@ -593,7 +593,7 @@ typedef struct {
                 IN UINT32 Type,
                 IN EFI_TPL NotifyTpl,
                 IN EFI_EVENT_NOTIFY NotifyFunction OPTIONAL,
-                IN CONST VOID *NotifyContext OPTIONAL,
+                IN CONST EFI_VOID *NotifyContext OPTIONAL,
                 IN CONST EFI_GUID *EventGroup OPTIONAL,
                 OUT EFI_EVENT *Event
         );
@@ -602,7 +602,7 @@ typedef struct {
     UINTN NumberOfTableEntries;
     struct EFI_CONFIGURATION_TABLE {
         EFI_GUID VendorGuid;
-        VOID *VendorTable;
+        EFI_VOID *VendorTable;
     } *ConfigurationTable;
 } EFI_SYSTEM_TABLE;
 
@@ -625,7 +625,7 @@ typedef struct {
     EFI_EVENT Event;
     EFI_STATUS Status;
     UINTN BufferSize;
-    VOID *Buffer;
+    EFI_VOID *Buffer;
 } EFI_FILE_IO_TOKEN;
 
 typedef struct _EFI_FILE_PROTOCOL {
@@ -650,13 +650,13 @@ typedef struct _EFI_FILE_PROTOCOL {
     EFI_STATUS (EFIAPI *EFI_FILE_READ)(
             IN struct _EFI_FILE_PROTOCOL *This,
             IN OUT UINTN *BufferSize,
-            OUT VOID *Buffer
+            OUT EFI_VOID *Buffer
     );
 
     EFI_STATUS (EFIAPI *EFI_FILE_WRITE)(
             IN struct _EFI_FILE_PROTOCOL *This,
             IN OUT UINTN *BufferSize,
-            IN VOID *Buffer
+            IN EFI_VOID *Buffer
     );
 
     EFI_STATUS (EFIAPI *EFI_FILE_GET_POSITION)(
@@ -673,14 +673,14 @@ typedef struct _EFI_FILE_PROTOCOL {
             IN struct _EFI_FILE_PROTOCOL *This,
             IN EFI_GUID *InformationType,
             IN OUT UINTN *BufferSize,
-            OUT VOID *Buffer
+            OUT EFI_VOID *Buffer
     );
 
     EFI_STATUS (EFIAPI *EFI_FILE_SET_INFO)(
             IN struct _EFI_FILE_PROTOCOL *This,
             IN EFI_GUID *InformationType,
             IN UINTN BufferSize,
-            IN VOID *Buffer
+            IN EFI_VOID *Buffer
     );
 
     EFI_STATUS (EFIAPI *EFI_FILE_FLUSH)(
