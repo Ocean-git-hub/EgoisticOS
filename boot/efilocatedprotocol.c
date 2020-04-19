@@ -12,5 +12,4 @@ void init_located_protocol() {
 
     EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
     system_table->BootServices->EFI_LOCATE_PROTOCOL(&gop_guid, NULL, (void **) &graphics_output_protocol);
-
 }

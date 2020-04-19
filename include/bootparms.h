@@ -2,6 +2,7 @@
 #define EGOISTICOS_BOOTPARMS_H
 
 #include <stdint.h>
+#include <framebuffer.h>
 
 typedef struct {
     uint32_t type;
@@ -16,10 +17,6 @@ typedef struct {
     uint64_t memoryMapSize, mapKey, descriptorSize;
     uint32_t descriptorVersion;
 } MemoryMap;
-
-typedef struct {
-    uint64_t frameBufferBase, frameBufferSize, screenHeight, screenWidth;
-} FrameBuffer;
 
 typedef struct {
     MemoryMap memoryMap;

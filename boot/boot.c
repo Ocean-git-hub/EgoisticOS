@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <bootparms.h>
+#include <framebuffer.h>
 
 #include "include/efi.h"
 #include "include/efisystab.h"
@@ -7,7 +8,9 @@
 #include "include/efiio.h"
 #include "include/efifilelib.h"
 #include "include/executablelib.h"
+#include "include/string.h"
 #include "include/utils.h"
+#include "include/ekf.h"
 
 void get_memory_map(MemoryMap *memory_map) {
     memory_map->memoryMapSize = 0;
@@ -64,24 +67,58 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
 
     BootParameter bootParameter;
     set_boot_parameters(&bootParameter);
-    if (is_elf(kernel_address)) {
-        print_string_n(L"This is a elf file.");
+    if (is_ek(kernel_address)) {
+        print_string_n(L"This is an egoistic kernel file.");
+        EKHeader *ek_header = (EKHeader *) kernel_address;
+        system_table->BootServices->EFI_SET_MEM((void *) kernel_address + ek_header->bssStart, ek_header->bssSize, 0);
         exit_boot_services(&bootParameter.memoryMap, image_handle);
-        uint64_t kernel_arg1 = (uint64_t) &bootParameter;
-        uint64_t kernel_start = get_text_start_for_elf((Elf64_Ehdr *) kernel_address);
+        uint64_t kernel_arg1 = (uint64_t) & bootParameter;
+        uint64_t kernel_start = (uint64_t) & ek_header->text;
+        uint64_t stack_base = kernel_address + 1024 * 1024 * 8;
         __asm__ volatile ("mov %0, %%rdi\n"
-                          "call %1\n"::"m"(kernel_arg1), "m"(kernel_start));
-    } else if (is_pe64(kernel_address)) {
-        print_string_n(L"This is a pe32+ file.");
-        uint64_t kernel_start = get_text_start_for_pe64((IMAGE_DOS_HEADER *) kernel_address);
-        exit_boot_services(&bootParameter.memoryMap, image_handle);
-        ((void (*)(BootParameter *)) kernel_start)(&bootParameter);
+                          "mov %1, %%rsp\n"
+                          "jmp *%2\n"::"m"(kernel_arg1), "m"(stack_base), "m"(kernel_start));
+        /*} else if (is_elf(kernel_address)) {
+            print_string_n(L"This is an elf file.");
+
+            Elf64_Shdr *bss_section = get_elf_section((Elf64_Ehdr *) kernel_address, ".bss");
+            if (bss_section == NULL) {
+                print_string_n(L"[!] Couldn't find .bss section.");
+            } else {
+                print_string_n(L"[*] Find bss");
+                print_string(L".bss sh_size: ");
+                print_decimal(bss_section->sh_size, 3, true);
+                print_string(L".bss sh_offset: ");
+                hex_dump(bss_section->sh_offset, 16);
+                system_table->BootServices->EFI_SET_MEM((void *) (kernel_address + bss_section->sh_offset),
+                                                        bss_section->sh_size, 0);
+            }
+
+            Elf64_Shdr *init_section = get_elf_section((Elf64_Ehdr *) kernel_address, ".init");
+            if (init_section == NULL) {
+                print_string_n(L"\r\n[!] Couldn't find .init section.");
+            } else {
+                ((void (*)()) (kernel_address + init_section->sh_offset))();
+            }
+
+            while (true);
+            exit_boot_services(&bootParameter.memoryMap, image_handle);
+            uint64_t kernel_arg1 = (uint64_t) &bootParameter;
+            uint64_t kernel_start = get_text_start_for_elf((Elf64_Ehdr *) kernel_address);
+            uint64_t stack_base = kernel_address + 1024 * 1024;
+            __asm__ volatile ("mov %0, %%rdi\n"
+                              "mov %1, %%rsp\n"
+                              "jmp *%2\n"::"m"(kernel_arg1), "m"(stack_base), "m"(kernel_start));
+        } else if (is_pe64(kernel_address)) {
+            print_string_n(L"This is a pe32+ file.");
+            uint64_t kernel_start = get_text_start_for_pe64((IMAGE_DOS_HEADER *) kernel_address);
+            exit_boot_services(&bootParameter.memoryMap, image_handle);
+            ((void (*)(BootParameter *)) kernel_start)(&bootParameter);*/
     } else {
         print_string_n(L"Sorry, this is an unsupported file.");
-        print_string_n(L"Press any key to shutdown...");
+        print_string_n(L"Please press any key to shutdown...");
         get_input_key();
         shutdown();
-        return EFI_UNSUPPORTED;
     }
     return EFI_SUCCESS;
 }

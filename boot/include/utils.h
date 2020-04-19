@@ -12,6 +12,8 @@ void hex_dump(uint64_t value, uint8_t digit);
 
 void dump_status(uint64_t status, bool linefeed);
 
+void print_decimal(uint64_t value, uint8_t digit, bool linefeed);
+
 void check_error(EFI_STATUS status, CHAR16 *message);
 
 uint64_t get_largest_screen_mode();

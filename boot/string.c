@@ -21,7 +21,12 @@ void str_n_copy(CHAR16 *dest, CHAR16 *src, int64_t n) {
     *dest = L'\0';
 }
 
-int8_t str_cmp(CHAR16 *s1, CHAR16 *s2) {
+int8_t str16_cmp(CHAR16 *s1, CHAR16 *s2) {
+    for (; *s1 == *s2 && *s1 != '\0'; s1++, s2++);
+    return *s1 - *s2;
+}
+
+int8_t str8_cmp(int8_t *s1, int8_t *s2) {
     for (; *s1 == *s2 && *s1 != '\0'; s1++, s2++);
     return *s1 - *s2;
 }
