@@ -44,6 +44,14 @@ void set_background(RGB *rgb) {
     background_rgb = *rgb;
 }
 
+uint64_t get_screen_height() {
+    return frameBuffer.screenHeight;
+}
+
+uint64_t get_screen_width() {
+    return frameBuffer.screenWidth;
+}
+
 void draw_fill_box(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, RGB *rgb) {
     for (int y = y0; y <= y1; ++y)
         for (int x = x0; x <= x1; ++x)

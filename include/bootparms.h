@@ -21,6 +21,7 @@ typedef struct {
 typedef struct {
     MemoryMap memoryMap;
     FrameBuffer frameBuffer;
+    void *acpi;
 } BootParameter;
 
 #endif //EGOISTICOS_BOOTPARMS_H

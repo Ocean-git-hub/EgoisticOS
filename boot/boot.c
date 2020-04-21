@@ -38,11 +38,29 @@ void get_memory_map(MemoryMap *memory_map) {
     memory_map->memoryDescriptor.virtualStart = memoryMapDescriptor->VirtualStart;
 }
 
+bool is_equal_guid(EFI_GUID *guid1, EFI_GUID *guid2) {
+    return ((uint64_t *) guid1)[0] == ((uint64_t *) guid2)[0] && ((uint64_t *) guid1)[1] == ((uint64_t *) guid2)[1];
+}
+
+void *get_configuration_table(EFI_GUID *guid) {
+    struct EFI_CONFIGURATION_TABLE *configuration_table = system_table->ConfigurationTable;
+    for (uint64_t i = 0; i < system_table->NumberOfTableEntries; ++i) {
+        if (is_equal_guid(&configuration_table->VendorGuid, guid))
+            return configuration_table->VendorTable;
+        configuration_table++;
+    }
+    return NULL;
+}
+
 void set_boot_parameters(BootParameter *boot_parameter) {
     boot_parameter->frameBuffer.frameBufferBase = graphics_output_protocol->Mode->FrameBufferBase;
     boot_parameter->frameBuffer.frameBufferSize = graphics_output_protocol->Mode->FrameBufferSize;
     boot_parameter->frameBuffer.screenHeight = graphics_output_protocol->Mode->Info->VerticalResolution;
     boot_parameter->frameBuffer.screenWidth = graphics_output_protocol->Mode->Info->HorizontalResolution;
+    EFI_GUID acpi_guid = EFI_ACPI_20_TABLE_GUID;
+    boot_parameter->acpi = get_configuration_table(&acpi_guid);
+    if (boot_parameter->acpi == NULL)
+        print_string_n(L"[!] Couldn't find ACPI table.");
 }
 
 void exit_boot_services(MemoryMap *memory_map, void *image_handle) {

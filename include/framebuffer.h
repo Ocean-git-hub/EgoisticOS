@@ -32,6 +32,10 @@ void set_foreground(RGB *rgb);
 
 void set_background(RGB *rgb);
 
+uint64_t get_screen_height();
+
+uint64_t get_screen_width();
+
 void draw_fill_box(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, RGB *rgb);
 
 #endif //EGOISTICOS_FRAMEBUFFER_H
