@@ -16,7 +16,13 @@ uint64_t str_len(CHAR16 *str) {
 }
 
 void str_n_copy(CHAR16 *dest, CHAR16 *src, int64_t n) {
-    while (n-- > 0 || *src == '\0')
+    while (n-- > 0 && *src != '\0')
+        *dest++ = *src++;
+    *dest = L'\0';
+}
+
+void str_copy(CHAR16 *dest, CHAR16 *src) {
+    while (*src != '\0')
         *dest++ = *src++;
     *dest = L'\0';
 }

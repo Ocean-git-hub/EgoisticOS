@@ -5,6 +5,7 @@
 #include "include/efi/efidef.h"
 #include "include/efisystab.h"
 #include "include/efiio.h"
+#include "include/string.h"
 
 #define TIME_ZONE_TOKYO 9
 #define MAX_DECIMAL_BUFFER 30
@@ -171,4 +172,59 @@ void *get_configuration_table(EFI_GUID *guid) {
         configuration_table++;
     }
     return NULL;
+}
+
+void get_memory_type_name(EFI_MEMORY_TYPE type, CHAR16 *buf) {
+    switch (type) {
+        case EfiReservedMemoryType:
+            str_copy(buf, L"EfiReservedMemoryType");
+            break;
+        case EfiLoaderCode:
+            str_copy(buf, L"EfiLoaderCode");
+            break;
+        case EfiLoaderData:
+            str_copy(buf, L"EfiLoaderData");
+            break;
+        case EfiBootServicesCode:
+            str_copy(buf, L"EfiBootServicesCode");
+            break;
+        case EfiBootServicesData:
+            str_copy(buf, L"EfiBootServicesData");
+            break;
+        case EfiRuntimeServicesCode:
+            str_copy(buf, L"EfiRuntimeServicesCode");
+            break;
+        case EfiRuntimeServicesData:
+            str_copy(buf, L"EfiRuntimeServicesData");
+            break;
+        case EfiConventionalMemory:
+            str_copy(buf, L"EfiConventionalMemory");
+            break;
+        case EfiUnusableMemory:
+            str_copy(buf, L"EfiUnusableMemory");
+            break;
+        case EfiACPIReclaimMemory:
+            str_copy(buf, L"EfiACPIReclaimMemory");
+            break;
+        case EfiACPIMemoryNVS:
+            str_copy(buf, L"EfiACPIMemoryNVS");
+            break;
+        case EfiMemoryMappedIO:
+            str_copy(buf, L"EfiMemoryMappedIO");
+            break;
+        case EfiMemoryMappedIOPortSpace:
+            str_copy(buf, L"EfiMemoryMappedIOPortSpace");
+            break;
+        case EfiPalCode:
+            str_copy(buf, L"EfiPalCode");
+            break;
+        case EfiPersistentMemory:
+            str_copy(buf, L"EfiPersistentMemory");
+            break;
+        case EfiMaxMemoryType:
+            str_copy(buf, L"EfiMaxMemoryType");
+            break;
+        default:
+            break;
+    }
 }

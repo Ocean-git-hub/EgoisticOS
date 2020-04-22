@@ -27,4 +27,6 @@ bool is_equal_guid(EFI_GUID *guid1, EFI_GUID *guid2);
 
 void *get_configuration_table(EFI_GUID *guid);
 
+void get_memory_type_name(EFI_MEMORY_TYPE type, CHAR16 *buf);
+
 #endif //EGOISTICOS_UTILS_H

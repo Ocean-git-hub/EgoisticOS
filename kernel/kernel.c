@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <bootparms.h>
 #include <framebuffer.h>

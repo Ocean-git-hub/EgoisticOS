@@ -58,18 +58,23 @@ void show_memory_map() {
     MemoryMap memory_map;
     get_memory_map(&memory_map);
     MemoryDescriptor *memory_descriptor = memory_map.memoryDescriptorBase;
+    CHAR16 buf[20];
     for (uint32_t i = 0; i < memory_map.memoryMapSize / memory_map.descriptorSize; ++i) {
         print_decimal(i, 2, false);
-        print_string(L": physicalStart: 0x");
+        print_string(L": physical: 0x");
         hex_dump(memory_descriptor->physicalStart, 16);
-        print_string(L" numberOfPages: ");
+        print_string(L" pages: ");
         print_decimal(memory_descriptor->numberOfPages, 8, false);
         print_string(L" type: ");
         print_decimal(memory_descriptor->type, 2, false);
-        print_string_n(L"");
+        print_string(L" ");
+        get_memory_type_name(memory_descriptor->type, buf);
+        print_string_n(buf);
+
         memory_descriptor = (MemoryDescriptor *) ((uint64_t) memory_descriptor + memory_map.descriptorSize);
         get_input_key();
     }
+    system_table->BootServices->EFI_FREE_POOL(memory_map.memoryDescriptorBase);
 }
 
 uint64_t get_total_memory_by_byte(MemoryMap *memory_map) {
@@ -82,6 +87,23 @@ uint64_t get_total_memory_by_byte(MemoryMap *memory_map) {
     return total_memory;
 }
 
+uint64_t get_free_page_address(uint64_t size, MemoryMap *memory_map) {
+    MemoryDescriptor *memory_descriptor = memory_map->memoryDescriptorBase;
+    for (uint32_t i = 0; i < memory_map->memoryMapSize / memory_map->descriptorSize; ++i) {
+        if (memory_descriptor->type == EfiConventionalMemory && memory_descriptor->numberOfPages * 4 * 1024 > size)
+            return memory_descriptor->physicalStart;
+        memory_descriptor = (MemoryDescriptor *) ((uint64_t) memory_descriptor + memory_map->descriptorSize);
+    }
+    return 0;
+}
+
+void unsupported(){
+    print_string_n(L"Sorry, this is an unsupported file.");
+    print_string_n(L"Please press any key to shutdown...");
+    get_input_key();
+    shutdown();
+}
+
 EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     init_systab(_system_table);
     init_located_protocol();
@@ -91,10 +113,22 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     print_boot_info();
     print_string_n(L"");
 
-    show_memory_map();
+    CHAR16 *kernel_name = L"kernel";
+    uint64_t stack_size = 1024 * 1024 * 8;
+    EFI_FILE_INFO *kernel_info = get_file_info(kernel_name);
+    uint64_t kernel_size = kernel_info->FileSize;
+    system_table->BootServices->EFI_FREE_POOL(kernel_info);
+    print_string(L"Kernel size: ");
+    print_decimal(kernel_size / 1024, 2, false);
+    print_string_n(L"KB");
 
-    uint64_t kernel_address = 0x100000;
-    read_file_to_address(kernel_address, L"kernel");
+    MemoryMap memory_map;
+    get_memory_map(&memory_map);
+    uint64_t kernel_address = get_free_page_address(kernel_size + stack_size, &memory_map);
+    if (kernel_address == 0)
+        unsupported();
+    system_table->BootServices->EFI_FREE_POOL(memory_map.memoryDescriptorBase);
+    read_file_to_address(kernel_address, kernel_name);
 
     BootParameter bootParameter;
     set_boot_parameters(&bootParameter);
@@ -106,10 +140,11 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
         bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);
         uint64_t kernel_arg1 = (uint64_t) &bootParameter;
         uint64_t kernel_start = (uint64_t) &ek_header->text;
-        uint64_t stack_base = kernel_address + 1024 * 1024 * 8;
+        uint64_t stack_base = kernel_address + stack_size;
         __asm__ volatile ("mov %0, %%rdi\n"
                           "mov %1, %%rsp\n"
-                          "jmp *%2\n"::"m"(kernel_arg1), "m"(stack_base), "m"(kernel_start));
+                          "jmp *%2\n"
+        ::"m"(kernel_arg1), "m"(stack_base), "m"(kernel_start));
         /*} else if (is_elf(kernel_address)) {
             print_string_n(L"This is an elf file.");
 
@@ -146,11 +181,7 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
             uint64_t kernel_start = get_text_start_for_pe64((IMAGE_DOS_HEADER *) kernel_address);
             exit_boot_services(&bootParameter.memoryMap, image_handle);
             ((void (*)(BootParameter *)) kernel_start)(&bootParameter);*/
-    } else {
-        print_string_n(L"Sorry, this is an unsupported file.");
-        print_string_n(L"Please press any key to shutdown...");
-        get_input_key();
-        shutdown();
-    }
+    } else
+        unsupported();
     return EFI_SUCCESS;
 }
