@@ -10,12 +10,11 @@ typedef struct {
     uint64_t virtualStart;
     uint64_t numberOfPages;
     uint64_t attribute;
-} MemoryDescripter;
+} MemoryDescriptor;
 
 typedef struct {
-    MemoryDescripter memoryDescriptor;
-    uint64_t memoryMapSize, mapKey, descriptorSize;
-    uint32_t descriptorVersion;
+    MemoryDescriptor *memoryDescriptorBase;
+    uint64_t memoryMapSize, mapKey, descriptorSize, totalMemory;
 } MemoryMap;
 
 typedef struct {

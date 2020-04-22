@@ -158,3 +158,17 @@ void print_boot_info() {
     print_datetime();
     print_string_n(L")");
 }
+
+bool is_equal_guid(EFI_GUID *guid1, EFI_GUID *guid2) {
+    return ((uint64_t *) guid1)[0] == ((uint64_t *) guid2)[0] && ((uint64_t *) guid1)[1] == ((uint64_t *) guid2)[1];
+}
+
+void *get_configuration_table(EFI_GUID *guid) {
+    struct EFI_CONFIGURATION_TABLE *configuration_table = system_table->ConfigurationTable;
+    for (uint64_t i = 0; i < system_table->NumberOfTableEntries; ++i) {
+        if (is_equal_guid(&configuration_table->VendorGuid, guid))
+            return configuration_table->VendorTable;
+        configuration_table++;
+    }
+    return NULL;
+}

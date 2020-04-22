@@ -9,10 +9,11 @@
 _Noreturn void start_kernel(BootParameter *bootParameter) {
     init_frame_buffer(&bootParameter->frameBuffer);
     clear_screen();
-    kernel_print_string_n("Start kernel.");
-    kernel_printf("ACPI Address: 0x%016lx\n", (uint64_t) bootParameter->acpi);
-    kernel_printf("%c %s %d %u %x %ld %lu %lx %08x\n",
-                  'A', "hello", -10, 10, 0xf7, -105151511549078510, 105151511549078510, 0xabcdefabcdef1234, 0xff);
+
+    kernel_print_string_n("\nEgoistic OS Kernel ver.0.1\n");
+    kernel_printf("total memory: %uMB\n", bootParameter->memoryMap.totalMemory / 1024 / 1024);
+    kernel_printf("Frame buffer base address: 0x%016lx\n", (uint64_t) bootParameter->frameBuffer.frameBufferBase);
+    kernel_printf("ACPI address: 0x%016lx\n", (uint64_t) bootParameter->acpi);
 
     while (true)
             __asm__ volatile ("hlt\n");

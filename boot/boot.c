@@ -14,42 +14,25 @@
 
 void get_memory_map(MemoryMap *memory_map) {
     memory_map->memoryMapSize = 0;
-    EFI_MEMORY_DESCRIPTOR *memoryMapDescriptor = NULL;
+    EFI_MEMORY_DESCRIPTOR *memoryDescriptor = NULL;
+    uint32_t descriptorVersion;
     EFI_STATUS status = system_table->BootServices->EFI_GET_MEMORY_MAP(&memory_map->memoryMapSize,
-                                                                       memoryMapDescriptor,
+                                                                       memoryDescriptor,
                                                                        &memory_map->mapKey,
                                                                        &memory_map->descriptorSize,
-                                                                       &memory_map->descriptorVersion);
-    while (status == EFI_BUFFER_TOO_SMALL || memoryMapDescriptor == NULL) {
-        if (memoryMapDescriptor != NULL)
-            system_table->BootServices->EFI_FREE_POOL(memoryMapDescriptor);
+                                                                       &descriptorVersion);
+    while (status == EFI_BUFFER_TOO_SMALL || memoryDescriptor == NULL) {
+        if (memoryDescriptor != NULL)
+            system_table->BootServices->EFI_FREE_POOL(memoryDescriptor);
         system_table->BootServices->EFI_ALLOCATE_POOL(EfiLoaderData, memory_map->memoryMapSize,
-                                                      (void **) &memoryMapDescriptor);
+                                                      (void **) &memoryDescriptor);
         status = system_table->BootServices->EFI_GET_MEMORY_MAP(&memory_map->memoryMapSize,
-                                                                memoryMapDescriptor,
+                                                                memoryDescriptor,
                                                                 &memory_map->mapKey,
                                                                 &memory_map->descriptorSize,
-                                                                &memory_map->descriptorVersion);
+                                                                &descriptorVersion);
     }
-    memory_map->memoryDescriptor.type = memoryMapDescriptor->Type;
-    memory_map->memoryDescriptor.attribute = memoryMapDescriptor->Attribute;
-    memory_map->memoryDescriptor.numberOfPages = memoryMapDescriptor->NumberOfPages;
-    memory_map->memoryDescriptor.physicalStart = memoryMapDescriptor->PhysicalStart;
-    memory_map->memoryDescriptor.virtualStart = memoryMapDescriptor->VirtualStart;
-}
-
-bool is_equal_guid(EFI_GUID *guid1, EFI_GUID *guid2) {
-    return ((uint64_t *) guid1)[0] == ((uint64_t *) guid2)[0] && ((uint64_t *) guid1)[1] == ((uint64_t *) guid2)[1];
-}
-
-void *get_configuration_table(EFI_GUID *guid) {
-    struct EFI_CONFIGURATION_TABLE *configuration_table = system_table->ConfigurationTable;
-    for (uint64_t i = 0; i < system_table->NumberOfTableEntries; ++i) {
-        if (is_equal_guid(&configuration_table->VendorGuid, guid))
-            return configuration_table->VendorTable;
-        configuration_table++;
-    }
-    return NULL;
+    memory_map->memoryDescriptorBase = (MemoryDescriptor *) memoryDescriptor;
 }
 
 void set_boot_parameters(BootParameter *boot_parameter) {
@@ -71,6 +54,34 @@ void exit_boot_services(MemoryMap *memory_map, void *image_handle) {
     } while (status != EFI_SUCCESS);
 }
 
+void show_memory_map() {
+    MemoryMap memory_map;
+    get_memory_map(&memory_map);
+    MemoryDescriptor *memory_descriptor = memory_map.memoryDescriptorBase;
+    for (uint32_t i = 0; i < memory_map.memoryMapSize / memory_map.descriptorSize; ++i) {
+        print_decimal(i, 2, false);
+        print_string(L": physicalStart: 0x");
+        hex_dump(memory_descriptor->physicalStart, 16);
+        print_string(L" numberOfPages: ");
+        print_decimal(memory_descriptor->numberOfPages, 8, false);
+        print_string(L" type: ");
+        print_decimal(memory_descriptor->type, 2, false);
+        print_string_n(L"");
+        memory_descriptor = (MemoryDescriptor *) ((uint64_t) memory_descriptor + memory_map.descriptorSize);
+        get_input_key();
+    }
+}
+
+uint64_t get_total_memory_by_byte(MemoryMap *memory_map) {
+    uint64_t total_memory = 0;
+    MemoryDescriptor *memory_descriptor = memory_map->memoryDescriptorBase;
+    for (uint32_t i = 0; i < memory_map->memoryMapSize / memory_map->descriptorSize; ++i) {
+        total_memory += memory_descriptor->numberOfPages * 4 * 1024;
+        memory_descriptor = (MemoryDescriptor *) ((uint64_t) memory_descriptor + memory_map->descriptorSize);
+    }
+    return total_memory;
+}
+
 EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     init_systab(_system_table);
     init_located_protocol();
@@ -79,6 +90,8 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     system_table->ConOut->EFI_TEXT_CLEAR_SCREEN(system_table->ConOut);
     print_boot_info();
     print_string_n(L"");
+
+    show_memory_map();
 
     uint64_t kernel_address = 0x100000;
     read_file_to_address(kernel_address, L"kernel");
@@ -90,8 +103,9 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
         EKHeader *ek_header = (EKHeader *) kernel_address;
         system_table->BootServices->EFI_SET_MEM((void *) kernel_address + ek_header->bssStart, ek_header->bssSize, 0);
         exit_boot_services(&bootParameter.memoryMap, image_handle);
-        uint64_t kernel_arg1 = (uint64_t) & bootParameter;
-        uint64_t kernel_start = (uint64_t) & ek_header->text;
+        bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);
+        uint64_t kernel_arg1 = (uint64_t) &bootParameter;
+        uint64_t kernel_start = (uint64_t) &ek_header->text;
         uint64_t stack_base = kernel_address + 1024 * 1024 * 8;
         __asm__ volatile ("mov %0, %%rdi\n"
                           "mov %1, %%rsp\n"

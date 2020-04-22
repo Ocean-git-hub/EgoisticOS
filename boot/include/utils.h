@@ -5,6 +5,7 @@
 #include <winnt.h>
 
 #include "efi/efidef.h"
+#include "efi/efistruct.h"
 #include "stdbool.h"
 #include "elf.h"
 
@@ -21,5 +22,9 @@ uint64_t get_largest_screen_mode();
 void shutdown();
 
 void print_boot_info();
+
+bool is_equal_guid(EFI_GUID *guid1, EFI_GUID *guid2);
+
+void *get_configuration_table(EFI_GUID *guid);
 
 #endif //EGOISTICOS_UTILS_H

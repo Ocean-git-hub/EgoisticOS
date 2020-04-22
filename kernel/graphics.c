@@ -12,13 +12,18 @@ uint64_t cursor_x, cursor_y;
 
 void kernel_print_char(char c) {
     if (c == '\n') {
-        cursor_x = 0;
+        cursor_x = font_width;
         cursor_y += font_height;
         return;
     }
     if (cursor_x + font_width >= get_screen_width()) {
-        cursor_x = 0;
+        cursor_x = font_width;
         cursor_y += font_height;
+    }
+    if (cursor_y + font_height >= get_screen_height()) {
+        cursor_x = font_width;
+        cursor_y = font_height;
+        clear_screen();
     }
     const uint8_t *font = font_data[c - 0x20];
     for (uint8_t y = 0; y < font_height; ++y) {
@@ -51,10 +56,9 @@ uint8_t s_print_unsigned_decimal(uint64_t value, char *s) {
         buf_tmp[(uint8_t) i++] = '0' + value % 10;
     while ((value /= 10) > 0 && i < MAX_DECIMAL_BUFFER - 1);
     while (i > 0)
-        s[j++] = buf_tmp[(uint8_t)--
-    i];
+        s[j++] = buf_tmp[--i];
     s[j] = '\0';
-    return --j;
+    return j;
 }
 
 uint8_t s_print_decimal(uint64_t value, char *s) {
@@ -76,10 +80,9 @@ int8_t s_print_hex(uint64_t value, char *s) {
         value >>= 4U;
     }
     while (i > 0)
-        s[j++] = tmp[(uint8_t)--
-    i];
+        s[j++] = tmp[--i];
     s[j] = '\0';
-    return --j;
+    return j;
 }
 
 int64_t power(uint8_t x, uint8_t y) {
@@ -166,4 +169,5 @@ void kernel_printf(const char *format, ...) {
         }
         format++;
     }
+    va_end(args);
 }

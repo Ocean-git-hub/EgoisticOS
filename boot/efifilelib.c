@@ -34,4 +34,6 @@ void read_file_to_address(uint64_t address, CHAR16 *file_name) {
     system_table->BootServices->EFI_FREE_POOL(file_info);
     system_table->BootServices->EFI_ALLOCATE_PAGES(AllocateAddress, EfiLoaderCode, (file_size + 4095) / 4096, &address);
     file->EFI_FILE_READ(file, &page_size, (void *) address);
+    file->EFI_FILE_CLOSE(file);
+    file->EFI_FILE_CLOSE(root);
 }
