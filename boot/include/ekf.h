@@ -5,7 +5,7 @@
 
 typedef struct __attribute__((packed)) {
     uint16_t magic;
-    uint64_t bssStart;
+    void *bssStart;
     uint64_t bssSize;
     void *text;
 } EKHeader;

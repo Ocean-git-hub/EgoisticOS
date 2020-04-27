@@ -97,11 +97,58 @@ uint64_t get_free_page_address(uint64_t size, MemoryMap *memory_map) {
     return 0;
 }
 
-void unsupported(){
-    print_string_n(L"Sorry, this is an unsupported file.");
-    print_string_n(L"Please press any key to shutdown...");
+void unsupported() {
+    print_string_n(L"[!] Sorry, this is an unsupported file.");
+    print_string_n(L"    Please press any key to shutdown...");
     get_input_key();
     shutdown();
+}
+
+void print_value(CHAR16 *name, uint64_t value, uint8_t digit) {
+    print_string(name);
+    print_string(L": 0x");
+    hex_dump(value, digit);
+    print_string(L" ");
+}
+
+#define PRINT_VALUE64(s) print_value(L###s, s, 16)
+#define PRINT_VALUE16(s) print_value(L###s, s, 4)
+
+void dump_registers() {
+    uint64_t rax, rbx, rcx, rdx, rsi, rdi, rbp, rsp, r8, r9, r10, r11, r12, r13, r14, r15;
+    uint16_t cs, ds, ss;
+    __asm__ volatile ("mov %%rax, %0\n""mov %%rbx, %1\n""mov %%rcx, %2\n""mov %%rdx, %3\n""mov %%rsi, %4\n"
+                      "mov %%rdi, %5\n""mov %%rbp, %6\n""mov %%rsp, %7\n""mov %%r8, %8\n""mov %%r9, %9\n"
+                      "mov %%r10, %10\n""mov %%r11, %11\n""mov %%r12, %12\n""mov %%r13, %13\n""mov %%r14, %14\n"
+                      "mov %%r15, %15\n""mov %%cs, %16\n""mov %%ds, %17\n""mov %%ss, %18\n"
+    ::"m"(rax), "m"(rbx), "m"(rcx), "m"(rdx), "m"(rdi), "m"(rsi), "m"(rbp), "m"(rsp), "m"(r8), "m"(r9), "m"(r10),
+    "m"(r11), "m"(r12), "m"(r13), "m"(r14), "m"(r15), "m"(cs), "m"(ds), "m"(ss));
+    print_string_n(L"[*] Dump registers");
+    PRINT_VALUE64(rax);
+    PRINT_VALUE64(rbx);
+    PRINT_VALUE64(rcx);
+    PRINT_VALUE64(rdx);
+    print_string_n(L"");
+    PRINT_VALUE64(rsi);
+    PRINT_VALUE64(rdi);
+    PRINT_VALUE64(rbp);
+    PRINT_VALUE64(rsp);
+    print_string_n(L"");
+    print_string(L" ");
+    PRINT_VALUE64(r8);
+    print_string(L" ");
+    PRINT_VALUE64(r9);
+    PRINT_VALUE64(r10);
+    PRINT_VALUE64(r11);
+    print_string_n(L"");
+    PRINT_VALUE64(r12);
+    PRINT_VALUE64(r13);
+    PRINT_VALUE64(r14);
+    PRINT_VALUE64(r15);
+    print_string_n(L"");
+    PRINT_VALUE16(cs);
+    PRINT_VALUE16(ds);
+    PRINT_VALUE16(ss);
 }
 
 EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
@@ -118,29 +165,43 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     EFI_FILE_INFO *kernel_info = get_file_info(kernel_name);
     uint64_t kernel_size = kernel_info->FileSize;
     system_table->BootServices->EFI_FREE_POOL(kernel_info);
-    print_string(L"Kernel size: ");
-    print_decimal(kernel_size / 1024, 2, false);
-    print_string_n(L"KB");
+    print_string(L"[*] Kernel size: ");
+    print_decimal(kernel_size, 10, false);
+    print_string_n(L"byte");
 
     MemoryMap memory_map;
     get_memory_map(&memory_map);
     uint64_t kernel_address = get_free_page_address(kernel_size + stack_size, &memory_map);
     if (kernel_address == 0)
         unsupported();
+    print_string(L"[*] There are free pages to load kernel\n\r[*] Kernel Start: 0x");
+    hex_dump(kernel_address, 16);
+    print_string_n(L"");
+
+    system_table->BootServices->EFI_ALLOCATE_PAGES(AllocateAddress, EfiLoaderCode,
+                                                   (kernel_size + stack_size + 4095) / 4096, &kernel_address);
     system_table->BootServices->EFI_FREE_POOL(memory_map.memoryDescriptorBase);
     read_file_to_address(kernel_address, kernel_name);
+    print_string_n(L"[*] Loading kernel successfully");
 
     BootParameter bootParameter;
     set_boot_parameters(&bootParameter);
     if (is_ek(kernel_address)) {
-        print_string_n(L"This is an egoistic kernel file.");
+        print_string_n(L"[*] This file is an egoistic kernel file.");
         EKHeader *ek_header = (EKHeader *) kernel_address;
-        system_table->BootServices->EFI_SET_MEM((void *) kernel_address + ek_header->bssStart, ek_header->bssSize, 0);
-        exit_boot_services(&bootParameter.memoryMap, image_handle);
-        bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);
+        system_table->BootServices->EFI_SET_MEM(kernel_address + ek_header->bssStart, ek_header->bssSize, 0);
         uint64_t kernel_arg1 = (uint64_t) &bootParameter;
         uint64_t kernel_start = (uint64_t) &ek_header->text;
         uint64_t stack_base = kernel_address + stack_size;
+        print_string(L"[*] Kernel arg1: 0x");
+        hex_dump(kernel_arg1, 16);
+        print_string(L"\r\n[*] Stack base: 0x");
+        hex_dump(stack_base, 16);
+        print_string_n(L"");
+        dump_registers();
+
+        exit_boot_services(&bootParameter.memoryMap, image_handle);
+        bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);
         __asm__ volatile ("mov %0, %%rdi\n"
                           "mov %1, %%rsp\n"
                           "jmp *%2\n"

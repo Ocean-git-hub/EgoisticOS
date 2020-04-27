@@ -8,7 +8,7 @@
 
 #define MAX_DECIMAL_BUFFER 20
 
-uint64_t cursor_x, cursor_y;
+uint64_t cursor_x = font_width, cursor_y = font_height;
 
 void kernel_print_char(char c) {
     if (c == '\n') {
