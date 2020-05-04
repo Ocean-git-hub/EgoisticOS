@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "kbencoder.h"
-#include "kbcontroller.h"
+#include <keyboard/kbencoder.h>
+#include <keyboard/kbcontroller.h>
 
 typedef struct {
     bool isScrollLock;

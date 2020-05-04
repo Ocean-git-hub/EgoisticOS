@@ -1,4 +1,4 @@
-#include "../include/framebuffer.h"
+#include "include/framebuffer.h"
 
 #include <stdbool.h>
 

@@ -1,0 +1,9 @@
+#ifndef EGOISTICOS_GDT_H
+#define EGOISTICOS_GDT_H
+
+#define SEGMENT_SELECTOR_CODE 0x8
+#define SEGMENT_SELECTOR_DATA 0x10
+
+void init_gdt();
+
+#endif //EGOISTICOS_GDT_H

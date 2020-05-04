@@ -1,8 +1,7 @@
-#include "include/interrupt.h"
-#include "include/x64.h"
-#include "include/handler.h"
+#include <architecture/interrupt.h>
 
-#include "include/graphics.h"
+#include <graphics.h>
+#include <architecture/gdt.h>
 
 #define NULL (void *)0
 #define MAX_NUM_IDT_DESCRIPTOR 256
@@ -13,25 +12,34 @@
 #define IDT_GATE_TYPES_INTERRUPT_GATE_32 0xeU
 #define IDT_GATE_TYPES_TRAP_GATE_32 0xfU
 
-IDTDescriptor idt_descriptors[MAX_NUM_IDT_DESCRIPTOR];
+IDT idt[MAX_NUM_IDT_DESCRIPTOR];
+
 struct __attribute__((packed)) {
     uint16_t size;
     uint64_t offset;
 } idtr;
 
 void set_interrupt_descriptor(uint8_t index, void *handler, uint8_t present) {
-    idt_descriptors[index].offset1 = (uint64_t) handler;
-    idt_descriptors[index].offset2 = (uint64_t) handler >> 16U;
-    idt_descriptors[index].offset3 = (uint64_t) handler >> 32U;
-    idt_descriptors[index].selector = SEGMENT_SELECTOR_CODE;
-    idt_descriptors[index].ist = 0;
-    idt_descriptors[index].zero = 0;
-    idt_descriptors[index].type = IDT_GATE_TYPES_INTERRUPT_GATE_32;
-    idt_descriptors[index].zero2 = 0;
-    idt_descriptors[index].dpl = 0;
-    idt_descriptors[index].present = present;
-    idt_descriptors[index].reserved = 0;
+    idt[index].offset1 = (uint64_t) handler;
+    idt[index].offset2 = (uint64_t) handler >> 16U;
+    idt[index].offset3 = (uint64_t) handler >> 32U;
+    idt[index].selector = SEGMENT_SELECTOR_CODE;
+    idt[index].ist = 0;
+    idt[index].zero = 0;
+    idt[index].type = IDT_GATE_TYPES_INTERRUPT_GATE_32;
+    idt[index].zero2 = 0;
+    idt[index].dpl = 0;
+    idt[index].present = present;
+    idt[index].reserved = 0;
 }
+
+//void exception_dump_cpu_context(CpuContext *cpu_context) {
+//    kernel_printf("CS:SS:SD %04x:%04x:%04x RBP:RSP %016lx:%016lx\n", cpu_context->cs, cpu_context->ss, cpu_context->ds, cpu_context->rbp, cpu_context->rsp);
+//    kernel_printf("ABCD:X   %016lx %016lx %016lx %016lx\n", cpu_context->rax, cpu_context->rbx, cpu_context->rcx, cpu_context->rdx);
+//    kernel_printf("RIP SD:I %016lx %016lx %016lx\n", cpu_context->rip, cpu_context->rsi, cpu_context->rdi);
+//    kernel_printf("R8-      %016lx %016lx %016lx %016lx\n", cpu_context->r8, cpu_context->r9, cpu_context->r10, cpu_context->r11);
+//    kernel_printf("R12-     %016lx %016lx %016lx %016lx\n", cpu_context->r12, cpu_context->r13, cpu_context->r14, cpu_context->r15);
+//}
 
 void DE() {
     kernel_printf("[!] DE has occurred.\n");
@@ -99,7 +107,9 @@ void SSF() {
 }
 
 void GPF() {
+    //set_cpu_context();
     kernel_printf("[!] GPF has occurred.\n");
+    //exception_dump_cpu_context(&context);
     while (1);
 }
 
@@ -148,14 +158,12 @@ void default_handler() {
     while (1);
 }
 
-void init_intrrupt() {
+void init_interrupt() {
     void *exceptions[] = {DE, DB, NMI, BP, OF, BRE, IO, DNA, DF, CSO, ITSS, SNP, SSF, GPF, PF, reserved, x87FPE, AC, MC,
                           SFPE, VE, reserved, SE, reserved};
     for (uint8_t i = 0; i <= 31; ++i)
         set_interrupt_descriptor(i, exceptions[i], 1);
-    for (uint16_t i = 32; i < MAX_NUM_IDT_DESCRIPTOR; ++i)
-        set_interrupt_descriptor(i, default_handler, 1);
-    idtr.size = sizeof(idt_descriptors) - 1;
-    idtr.offset = (uint64_t) idt_descriptors;
+    idtr.size = sizeof(idt) - 1;
+    idtr.offset = (uint64_t) idt;
     __asm__ volatile ("lidt %0\n"::"m"(idtr));
 }

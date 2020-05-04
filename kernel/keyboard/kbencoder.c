@@ -1,11 +1,9 @@
-#include "include/kbencoder.h"
+#include <keyboard/kbencoder.h>
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "include/x64.h"
-#include "include/ioport.h"
-#include "include/kbcontroller.h"
+#include <x64.h>
+#include <keyboard/kbcontroller.h>
 
 uint8_t read_keyboard_encoder_buffer() {
     return io_read_b(IO_PORT_KEYBOARD_CONTROLLER_DATA_PORT);

@@ -1,15 +1,10 @@
-#include "include/keyboard.h"
+#include <keyboard.h>
 
 #include <stdint.h>
-
-#include "include/x64.h"
-#include "include/ioport.h"
-#include "include/interrupt.h"
-#include "include/pic.h"
-#include "include/kbencoder.h"
-#include "include/kbcontroller.h"
-
-#include "include/graphics.h"
+#include <x64.h>
+#include <keyboard/kbencoder.h>
+#include <keyboard/kbcontroller.h>
+#include <graphics.h>
 
 #define DO_NOT_USE 0
 
@@ -80,7 +75,7 @@ void do_keyboard_interrupt() {
 //        current_scan_code = get_scan_code();
 //        is_set_scan_code = true;
     }
-    send_pic_eoi(PIC_IRQ_KEYBOARD);
+    send_apic_eoi(IRQ_KEYBOARD);
 }
 
 void keyboard_interrupt() {
@@ -117,17 +112,15 @@ void keyboard_interrupt() {
                       "pop %rcx\n"
                       "pop %rbx\n"
                       "pop %rax\n"
+                      "add $8, %rsp\n"
                       "iretq\n");
 }
 
 void init_keyboard() {
-    set_interrupt_descriptor(PIC_IRQ_KEYBOARD, keyboard_interrupt, 1);
-    set_pic_irq(true, PIC_IRQ_KEYBOARD);
+    set_interrupt_descriptor(IRQ_KEYBOARD, keyboard_interrupt, 1);
+    set_apic_irq(true, IRQ_KEYBOARD);
 }
 
 char get_char() {
-    is_set_scan_code = false;
-    while (!is_set_scan_code);
-    is_set_scan_code = false;
-    return keymap_codeset1[current_scan_code];
+    return keymap_codeset1[get_scan_code()];
 }

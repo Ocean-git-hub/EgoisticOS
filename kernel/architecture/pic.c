@@ -1,11 +1,11 @@
-#include "include/pic.h"
+#include <architecture/pic.h>
 
 #include <stdbool.h>
 
-#include "include/x64.h"
-#include "include/ioport.h"
+#include <architecture/ioport.h>
+#include <architecture/io.h>
 
-#include "include/graphics.h"
+#include <graphics.h>
 
 #define INTERRUPT_NUMBER_MASTER_BASE 0x20
 #define INTERRUPT_NUMBER_SLAVE_BASE 0x28
@@ -86,6 +86,13 @@ typedef union {
     } OCW2;
 } OCW;
 
+void mask_all_pic_irq(){
+    OCW ocw;
+    ocw.bits = PIC_INTERRUPT_MASK_REGISTER_IRQ_ALL_MASK;
+    io_write_b(IO_PORT_PIC_MASTER_INTERRUPT_MASK_REGISTER, ocw.bits);
+    io_write_b(IO_PORT_PIC_SLAVE_INTERRUPT_MASK_REGISTER, ocw.bits);
+}
+
 void init_pic() {
     ICW icw = {};
     icw.ICW1.IC4 = 1;
@@ -111,10 +118,7 @@ void init_pic() {
     io_write_b(IO_PORT_PIC_MASTER_DATA, icw.bits);
     io_write_b(IO_PORT_PIC_SLAVE_DATA, icw.bits);
 
-    OCW ocw;
-    ocw.bits = PIC_INTERRUPT_MASK_REGISTER_IRQ_ALL_MASK;
-    io_write_b(IO_PORT_PIC_MASTER_INTERRUPT_MASK_REGISTER, ocw.bits);
-    io_write_b(IO_PORT_PIC_SLAVE_INTERRUPT_MASK_REGISTER, ocw.bits);
+    mask_all_pic_irq();
 }
 
 void set_pic_irq(bool is_enable, uint8_t irq_no) {

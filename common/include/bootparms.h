@@ -2,7 +2,7 @@
 #define EGOISTICOS_BOOTPARMS_H
 
 #include <stdint.h>
-#include <framebuffer.h>
+#include "framebuffer.h"
 
 typedef struct {
     uint32_t type;

@@ -1,11 +1,9 @@
-#include "include/kbcontroller.h"
+#include <keyboard/kbcontroller.h>
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "include/x64.h"
-#include "include/ioport.h"
-#include "include/kbencoder.h"
+#include <x64.h>
+#include <keyboard/kbencoder.h>
 
 #define KEYBOARD_CONTROLLER_SELF_TEST_OK 0x55
 

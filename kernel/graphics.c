@@ -1,10 +1,8 @@
-#include "include/graphics.h"
-
+#include <graphics.h>
 #include <stdint.h>
-#include <framebuffer.h>
 #include <stdarg.h>
-
-#include "include/font.h"
+#include <font.h>
+#include "../common/include/framebuffer.h"
 
 #define MAX_DECIMAL_BUFFER 20
 
@@ -70,11 +68,26 @@ uint8_t s_print_decimal(uint64_t value, char *s) {
     return s_print_unsigned_decimal(value, s) + is_signed;
 }
 
-int8_t s_print_hex(uint64_t value, char *s) {
+int8_t s_print_hex64(uint64_t value, char *s) {
     char tmp[17] = {0}, unit_val;
     int8_t i;
     uint8_t j = 0;
     for (i = 0; i < 16 && value > 0; i++) {
+        unit_val = value & 0xfU;
+        tmp[i] = unit_val + ((unit_val < 0xa) ? '0' : 'A' - 0xa);
+        value >>= 4U;
+    }
+    while (i > 0)
+        s[j++] = tmp[--i];
+    s[j] = '\0';
+    return j;
+}
+
+int8_t s_print_hex32(uint32_t value, char *s) {
+    char tmp[9] = {0}, unit_val;
+    int8_t i;
+    uint8_t j = 0;
+    for (i = 0; i < 8 && value > 0; i++) {
         unit_val = value & 0xfU;
         tmp[i] = unit_val + ((unit_val < 0xa) ? '0' : 'A' - 0xa);
         value >>= 4U;
@@ -135,7 +148,7 @@ void kernel_printf(const char *format, ...) {
                 kernel_print_string(buf);
                 break;
             case 'x':
-                n_reading_zero = reading_zero - s_print_hex(va_arg(args, int32_t), buf);
+                n_reading_zero = reading_zero - s_print_hex32(va_arg(args, int32_t), buf);
                 for (int j = 0; j < n_reading_zero; ++j)
                     kernel_print_char('0');
                 kernel_print_string(buf);
@@ -155,7 +168,7 @@ void kernel_printf(const char *format, ...) {
                         kernel_print_string(buf);
                         break;
                     case 'x':
-                        n_reading_zero = reading_zero - s_print_hex(va_arg(args, int64_t), buf);
+                        n_reading_zero = reading_zero - s_print_hex64(va_arg(args, int64_t), buf);
                         for (int j = 0; j < n_reading_zero; ++j)
                             kernel_print_char('0');
                         kernel_print_string(buf);

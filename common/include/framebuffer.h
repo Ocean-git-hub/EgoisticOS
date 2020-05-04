@@ -2,6 +2,7 @@
 #define EGOISTICOS_FRAMEBUFFER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
     uint8_t blue;
@@ -35,6 +36,8 @@ void set_background(RGB *rgb);
 uint64_t get_screen_height();
 
 uint64_t get_screen_width();
+
+bool is_in_screen(uint64_t x, uint64_t y);
 
 void draw_fill_box(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, RGB *rgb);
 
