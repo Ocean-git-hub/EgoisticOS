@@ -142,7 +142,7 @@ void set_apic_irq(bool is_enable, uint8_t irq_no) {
 
 void send_apic_eoi(uint8_t irq_no) {
     irq_no -= INTERRUPT_NUMBER_MASTER_BASE;
-    *(uint32_t*) (uint64_t) (local_apic_base + 0xb0) = 0;
+    *(uint32_t*) (uint64_t) (local_apic_base + LOCAL_APIC_REGISTER_ADDRESS_MAP_EOI) = 0;
 }
 
 void init_apic(SDTHeader *apic_header) {

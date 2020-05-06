@@ -14,6 +14,11 @@ void kernel_print_char(char c) {
         cursor_y += font_height;
         return;
     }
+    if (c == '\t') {
+        for (uint8_t i = 0; i < 4; ++i)
+            kernel_print_char(' ');
+        return;
+    }
     if (cursor_x + font_width >= get_screen_width()) {
         cursor_x = font_width;
         cursor_y += font_height;

@@ -20,13 +20,10 @@ _Noreturn void start_kernel(BootParameter *bootParameter) {
     init_interrupt();
     init_acpi(bootParameter->acpi);
     SDTHeader *apic_header = get_sdth("APIC");
-    if (apic_header != (void *) 0)
-        init_apic(apic_header);
-    else
-        kernel_print_string_n("[!] Not found APIC.");
+    init_apic(apic_header);
     init_keyboard();
     enable_cpu_interrupt();
 
     while (true)
-        halt();
+        kernel_printf("%c", get_char());
 }

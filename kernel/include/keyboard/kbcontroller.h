@@ -4,24 +4,28 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define KEYBOARD_CONTROLLER_DATA_MAKE 0
-#define KEYBOARD_CONTROLLER_DATA_BREAK 1
+#define KEYBOARD_CONTROLLER_DATA_BREAK 0x80U
 
 #define KEYBOARD_CONTROLLER_STATUS_BUFFER_EMPTY 0
 #define KEYBOARD_CONTROLLER_STATUS_BUFFER_EXIST 1
 
-#define KEYBOARD_CONTROLLER_STATUS_BIT_OBF 0x01U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_IBF 0x02U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_F0 0x04U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_F1 0x08U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_ST4 0x10U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_ST5 0x20U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_ST6 0x40U
-#define KEYBOARD_CONTROLLER_STATUS_BIT_ST7 0x80U
-
 #define KEYBOARD_CONTROLLER_COMMAND_SELF_TEST 0xaa
 
-uint8_t read_keyboard_controller_status();
+typedef union {
+    uint8_t bits;
+    struct {
+        uint8_t OBF: 1;
+        uint8_t IBF: 1;
+        uint8_t F0: 1;
+        uint8_t F1: 1;
+        uint8_t ST4: 1;
+        uint8_t ST5: 1;
+        uint8_t ST6: 1;
+        uint8_t ST7: 1;
+    };
+} KeyboardControllerStatus;
+
+KeyboardControllerStatus read_keyboard_controller_status();
 
 void write_keyboard_controller_command(uint8_t command);
 

@@ -10,8 +10,7 @@ uint8_t read_keyboard_encoder_buffer() {
 }
 
 void write_keyboard_encoder_command(uint8_t command) {
-    while ((read_keyboard_controller_status() & KEYBOARD_CONTROLLER_STATUS_BIT_IBF) !=
-           KEYBOARD_CONTROLLER_STATUS_BUFFER_EMPTY);
+    while ((read_keyboard_controller_status().IBF) != KEYBOARD_CONTROLLER_STATUS_BUFFER_EMPTY);
     io_write_b(IO_PORT_KEYBOARD_CONTROLLER_DATA_PORT, command);
 }
 
