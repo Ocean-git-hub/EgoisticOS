@@ -2,3 +2,4 @@
 /fs/
 deploy
 OVMF.fd
+/filedump

@@ -3,7 +3,6 @@
 #include <graphics.h>
 #include <architecture/gdt.h>
 
-#define NULL (void *)0
 #define MAX_NUM_IDT_DESCRIPTOR 256
 
 #define IDT_GATE_TYPES_TASK_GATE_32 0x5U

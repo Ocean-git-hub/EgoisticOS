@@ -15,12 +15,10 @@ _Noreturn void start_kernel(BootParameter *bootParameter) {
     kernel_printf("Total memory: %uMB\n", bootParameter->memoryMap.totalMemory / 1024 / 1024);
     kernel_printf("Frame buffer base address: 0x%016lx\n", (uint64_t) bootParameter->frameBuffer.frameBufferBase);
     kernel_printf("ACPI address: 0x%016lx\n", (uint64_t) bootParameter->acpi);
-    //kernel_printf("Keyboard self test: %s\n", keyboard_self_test() == true ? "Success" : "Failed");
     init_gdt();
     init_interrupt();
     init_acpi(bootParameter->acpi);
-    SDTHeader *apic_header = get_sdth("APIC");
-    init_apic(apic_header);
+    init_apic(get_sdth("APIC"));
     init_keyboard();
     enable_cpu_interrupt();
 
