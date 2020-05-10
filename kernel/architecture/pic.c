@@ -123,8 +123,6 @@ void init_pic() {
 
 void set_pic_irq(bool is_enable, uint8_t irq_no) {
     irq_no -= INTERRUPT_NUMBER_MASTER_BASE;
-    if (irq_no < 0)
-        return;
     if (irq_no < 8) {
         OCW current_mask = (OCW) io_read_b(IO_PORT_PIC_MASTER_INTERRUPT_MASK_REGISTER);
         OCW mask = current_mask;
@@ -150,8 +148,6 @@ void set_pic_irq(bool is_enable, uint8_t irq_no) {
 
 void send_pic_eoi(uint8_t irq_no) {
     irq_no -= INTERRUPT_NUMBER_MASTER_BASE;
-    if (irq_no < 0)
-        return;
     OCW ocw2 = {};
     ocw2.OCW2.IRN = irq_no;
     ocw2.OCW2.command = PIC_OCW2_NORMAL_EOI_COMMAND;

@@ -5,6 +5,9 @@
 #include <stdbool.h>
 
 #include <acpi.h>
+#include <architecture/pic.h>
+
+#define INTERRUPT_NUMBER_BASE 0x20
 
 typedef struct __attribute__ ((packed)) {
     SDTHeader header;
@@ -23,7 +26,7 @@ bool is_support_x2apic();
 
 void set_apic_irq(bool is_enable, uint8_t irq_no);
 
-void send_apic_eoi(uint8_t irq_no);
+void send_apic_eoi();
 
 void init_apic(SDTHeader *apic_header);
 

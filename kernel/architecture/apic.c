@@ -5,8 +5,6 @@
 #include <architecture/pic.h>
 #include <graphics.h>
 
-#define INTERRUPT_NUMBER_MASTER_BASE 0x20
-
 #define CPUID_EAX1_X2APIC_SUPPORT_BIT 0x200000U //bit 21
 
 #define LOCAL_APIC_REGISTER_ADDRESS_MAP_LOCAL_APIC_ID 0x20
@@ -133,16 +131,15 @@ set_redirection_table_register(uint8_t irq_no, uint8_t vector, uint8_t trigger, 
 
 void set_apic_irq(bool is_enable, uint8_t irq_no) {
     uint8_t vector = irq_no;
-    irq_no -= INTERRUPT_NUMBER_MASTER_BASE;
+    irq_no -= INTERRUPT_NUMBER_BASE;
     if (is_enable)
         set_redirection_table_register(irq_no, vector, 0, 0, 0);
     else
         set_redirection_table_register(irq_no, vector, 0, 1, 0);
 }
 
-void send_apic_eoi(uint8_t irq_no) {
-    irq_no -= INTERRUPT_NUMBER_MASTER_BASE;
-    *(uint32_t*) (uint64_t) (local_apic_base + LOCAL_APIC_REGISTER_ADDRESS_MAP_EOI) = 0;
+void send_apic_eoi() {
+    *(uint32_t *) (uint64_t) (local_apic_base + LOCAL_APIC_REGISTER_ADDRESS_MAP_EOI) = 0;
 }
 
 void init_apic(SDTHeader *apic_header) {

@@ -1,6 +1,6 @@
 #include <stdbool.h>
-#include <bootparms.h>
-#include <framebuffer.h>
+#include "../common/include/framebuffer.h"
+#include "../common/include/bootparms.h"
 
 #include "include/efi.h"
 #include "include/efisystab.h"
@@ -44,6 +44,15 @@ void set_boot_parameters(BootParameter *boot_parameter) {
     boot_parameter->acpi = get_configuration_table(&acpi_guid);
     if (boot_parameter->acpi == NULL)
         print_string_n(L"[!] Couldn't find ACPI table.");
+    EFI_TIME time;
+    system_table->RuntimeServices->EFI_GET_TIME(&time, NULL);
+    boot_parameter->time.year = time.Year;
+    boot_parameter->time.month = time.Month;
+    boot_parameter->time.day = time.Day;
+    boot_parameter->time.hour = time.Hour;
+    boot_parameter->time.minute = time.Minute;
+    boot_parameter->time.second = time.Second;
+    boot_parameter->time.nanosecond = time.Nanosecond;
 }
 
 void exit_boot_services(MemoryMap *memory_map, void *image_handle) {
@@ -185,20 +194,21 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     print_string_n(L"[*] Loading kernel successfully");
 
     BootParameter bootParameter;
-    set_boot_parameters(&bootParameter);
     if (is_ek(kernel_address)) {
         print_string_n(L"[*] This file is an egoistic kernel file.");
         EKHeader *ek_header = (EKHeader *) kernel_address;
         system_table->BootServices->EFI_SET_MEM(kernel_address + ek_header->bssStart, ek_header->bssSize, 0);
         uint64_t kernel_arg1 = (uint64_t) &bootParameter;
         uint64_t kernel_start = (uint64_t) &ek_header->text;
-        uint64_t stack_base = kernel_address + stack_size;
+        uint64_t stack_base = (kernel_address + stack_size) / 16 * 16;
         print_string(L"[*] Kernel arg1: 0x");
         hex_dump(kernel_arg1, 16);
         print_string(L"\r\n[*] Stack base: 0x");
         hex_dump(stack_base, 16);
         print_string_n(L"");
         dump_registers();
+        get_input_key();
+        set_boot_parameters(&bootParameter);
 
         exit_boot_services(&bootParameter.memoryMap, image_handle);
         bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);

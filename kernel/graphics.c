@@ -32,7 +32,7 @@ void kernel_print_char(char c) {
     for (uint8_t y = 0; y < font_height; ++y) {
         uint8_t font_w = font[y];
         for (int8_t x = font_width; x >= 0; x--) {
-            uint8_t pixel = (font_w >> x - 1) & 0b1U;
+            uint8_t pixel = (font_w >> (x - 1)) & 0b1U;
             if (pixel == 1)
                 draw_pixel_foreground(font_width - x + cursor_x, y + cursor_y);
         }
@@ -52,16 +52,16 @@ void kernel_print_string_n(const char *str) {
 }
 
 uint8_t s_print_unsigned_decimal(uint64_t value, char *s) {
-    int8_t i = 0;
-    uint8_t j = 0;
-    char buf_tmp[MAX_DECIMAL_BUFFER] = {0};
-    do
-        buf_tmp[(uint8_t) i++] = '0' + value % 10;
-    while ((value /= 10) > 0 && i < MAX_DECIMAL_BUFFER - 1);
-    while (i > 0)
-        s[j++] = buf_tmp[--i];
-    s[j] = '\0';
-    return j;
+    uint8_t digit = 1;
+    uint64_t value_tmp = value;
+    while ((value_tmp /= 10) != 0)
+        digit++;
+    s[digit] = '\0';
+    for (int16_t i = digit - 1; i >= 0; i--) {
+        s[i] = '0' + value % 10;
+        value /= 10;
+    }
+    return digit;
 }
 
 uint8_t s_print_decimal(uint64_t value, char *s) {
@@ -177,6 +177,118 @@ void kernel_printf(const char *format, ...) {
                         for (int j = 0; j < n_reading_zero; ++j)
                             kernel_print_char('0');
                         kernel_print_string(buf);
+                        break;
+                    default:
+                        kernel_print_char(*format);
+                }
+                break;
+            default:
+                kernel_print_char(*format);
+        }
+        format++;
+    }
+    va_end(args);
+}
+
+void print_char_coordinate(char c, uint64_t start_x, uint64_t start_y) {
+    const uint8_t *font = font_data[c - 0x20];
+    for (uint8_t y = 0; y < font_height; ++y) {
+        uint8_t font_w = font[y];
+        for (int8_t x = font_width; x >= 0; x--) {
+            uint8_t pixel = (font_w >> (x - 1U)) & 0b1U;
+            if (pixel == 1)
+                draw_pixel_foreground(font_width - x + start_x, y + start_y);
+            else
+                draw_pixel_background(font_width - x + start_x, y + start_y);
+        }
+    }
+}
+
+void print_string_coordinate(const char *str, uint64_t x, uint64_t y) {
+    while (*str != '\0') {
+        print_char_coordinate(*str++, x, y);
+        x += font_width;
+    }
+}
+
+void printf_coordinate(uint64_t x, uint64_t y, const char *format, ...) {
+    va_list args;
+    char reading_zero_buf[_READING_ZERO_BUFFER_SIZE] = {0}, buf[MAX_DECIMAL_BUFFER + 1];
+    uint8_t reading_zero_buf_index, reading_zero;
+    int8_t n_reading_zero;
+    va_start(args, format);
+    while (*format != '\0') {
+        if (*format != '%') {
+            print_char_coordinate(*format++, x, y);
+            x += font_width;
+            continue;
+        }
+        format++;
+        reading_zero = reading_zero_buf_index = 0;
+        if (*format == '0') {
+            format++;
+            while ('0' <= *format && *format <= '9')
+                if (reading_zero_buf_index < _READING_ZERO_BUFFER_SIZE)
+                    reading_zero_buf[reading_zero_buf_index++] = *format++;
+            for (uint8_t i = 0; i < reading_zero_buf_index; ++i)
+                reading_zero += (reading_zero_buf[reading_zero_buf_index - i - 1] - '0') * power(10, i);
+        }
+        switch (*format) {
+            case 'c':
+                print_char_coordinate(va_arg(args, int32_t), x, y);
+                break;
+            case 's':
+                print_string_coordinate(va_arg(args, const char*), x, y);
+                break;
+            case 'd':
+                n_reading_zero = reading_zero - s_print_decimal(va_arg(args, int32_t), buf);
+                for (int j = 0; j < n_reading_zero; ++j) {
+                    print_char_coordinate('0', x, y);
+                    x += font_width;
+                }
+                print_string_coordinate(buf, x, y);
+                break;
+            case 'u':
+                n_reading_zero = reading_zero - s_print_unsigned_decimal(va_arg(args, int32_t), buf);
+                for (int j = 0; j < n_reading_zero; ++j) {
+                    print_char_coordinate('0', x, y);
+                    x += font_width;
+                }
+                print_string_coordinate(buf, x, y);
+                break;
+            case 'x':
+                n_reading_zero = reading_zero - s_print_hex32(va_arg(args, int32_t), buf);
+                for (int j = 0; j < n_reading_zero; ++j) {
+                    print_char_coordinate('0', x, y);
+                    x += font_width;
+                }
+                print_string_coordinate(buf, x, y);
+                break;
+            case 'l':
+                switch (*++format) {
+                    case 'd':
+                        n_reading_zero = reading_zero - s_print_decimal(va_arg(args, int64_t), buf);
+                        for (int j = 0; j < n_reading_zero; ++j) {
+                            print_char_coordinate('0', x, y);
+                            x += font_width;
+                        }
+                        print_string_coordinate(buf, x, y);
+                        break;
+                    case 'u':
+                        n_reading_zero = reading_zero - s_print_unsigned_decimal(va_arg(args, int64_t), buf);
+                        for (int j = 0; j < n_reading_zero; ++j) {
+                            print_char_coordinate('0', x, y);
+                            x += font_width;
+                        }
+                        print_string_coordinate(buf, x, y);
+                        break;
+                    case 'x':
+                        n_reading_zero = reading_zero - s_print_hex64(va_arg(args, int64_t), buf);
+                        for (int j = 0; j < n_reading_zero; ++j) {
+                            print_char_coordinate('0', x, y);
+                            x += font_width;
+                        }
+                        print_string_coordinate(buf, x, y);
                         break;
                     default:
                         kernel_print_char(*format);
