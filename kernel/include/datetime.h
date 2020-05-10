@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef struct __attribute__((packed)) {
+typedef struct {
     uint16_t year;
     uint8_t month;
     uint8_t day;
@@ -11,10 +11,10 @@ typedef struct __attribute__((packed)) {
     uint8_t minute;
     uint8_t second;
     uint32_t milliSecond;
-} Time_t;
+} DateTime;
 
-void init_datetime(Time_t _time);
+void init_datetime();
 
-Time_t get_time();
+DateTime get_datetime();
 
 #endif //EGOISTICOS_DATETIME_H

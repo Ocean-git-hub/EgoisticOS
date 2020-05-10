@@ -44,15 +44,6 @@ void set_boot_parameters(BootParameter *boot_parameter) {
     boot_parameter->acpi = get_configuration_table(&acpi_guid);
     if (boot_parameter->acpi == NULL)
         print_string_n(L"[!] Couldn't find ACPI table.");
-    EFI_TIME time;
-    system_table->RuntimeServices->EFI_GET_TIME(&time, NULL);
-    boot_parameter->time.year = time.Year;
-    boot_parameter->time.month = time.Month;
-    boot_parameter->time.day = time.Day;
-    boot_parameter->time.hour = time.Hour;
-    boot_parameter->time.minute = time.Minute;
-    boot_parameter->time.second = time.Second;
-    boot_parameter->time.nanosecond = time.Nanosecond;
 }
 
 void exit_boot_services(MemoryMap *memory_map, void *image_handle) {
@@ -194,6 +185,7 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     print_string_n(L"[*] Loading kernel successfully");
 
     BootParameter bootParameter;
+    set_boot_parameters(&bootParameter);
     if (is_ek(kernel_address)) {
         print_string_n(L"[*] This file is an egoistic kernel file.");
         EKHeader *ek_header = (EKHeader *) kernel_address;
@@ -207,8 +199,8 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
         hex_dump(stack_base, 16);
         print_string_n(L"");
         dump_registers();
+        print_string_n(L"\r\nPress any key to continue.");
         get_input_key();
-        set_boot_parameters(&bootParameter);
 
         exit_boot_services(&bootParameter.memoryMap, image_handle);
         bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);

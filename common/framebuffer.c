@@ -14,19 +14,19 @@ bool is_in_screen(uint64_t x, uint64_t y) {
     return x < frameBuffer.screenWidth && y < frameBuffer.screenHeight;
 }
 
-inline void draw_pixel(uint64_t x, uint64_t y, RGB *rgb) {
+void draw_pixel(uint64_t x, uint64_t y, RGB *rgb) {
     ((PixelFormat *)
             (frameBuffer.frameBufferBase +
              sizeof(PixelFormat) * (frameBuffer.screenWidth * y + x)))->rgb = *rgb;
 }
 
-inline void draw_pixel_foreground(uint64_t x, uint64_t y) {
+void draw_pixel_foreground(uint64_t x, uint64_t y) {
     ((PixelFormat *)
             (frameBuffer.frameBufferBase +
              sizeof(PixelFormat) * (frameBuffer.screenWidth * y + x)))->rgb = foreground_rgb;
 }
 
-inline void draw_pixel_background(uint64_t x, uint64_t y) {
+void draw_pixel_background(uint64_t x, uint64_t y) {
     ((PixelFormat *)
             (frameBuffer.frameBufferBase +
              sizeof(PixelFormat) * (frameBuffer.screenWidth * y + x)))->rgb = background_rgb;

@@ -160,7 +160,7 @@ void default_handler() {
 void init_interrupt() {
     void *exceptions[] = {DE, DB, NMI, BP, OF, BRE, IO, DNA, DF, CSO, ITSS, SNP, SSF, GPF, PF, reserved, x87FPE, AC, MC,
                           SFPE, VE, reserved, SE, reserved};
-    for (uint8_t i = 0; i <= 31; ++i)
+    for (uint8_t i = 0; i < 24; ++i)
         set_interrupt_descriptor(i, exceptions[i], 1);
     idtr.size = sizeof(idt) - 1;
     idtr.offset = (uint64_t) idt;
