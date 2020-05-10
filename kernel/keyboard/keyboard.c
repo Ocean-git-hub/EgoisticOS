@@ -94,7 +94,7 @@ void analyse_key_status() {
             set_key_status(input_key.unprintableCode, true);
             is_next_e0 = false;
         } else if (scan_code < 128) {
-            char codeset = keymap_codeset1_printable[scan_code];
+            uint8_t codeset = keymap_codeset1_printable[scan_code];
             if (codeset != 0) {
                 input_key.unprintableCode = 0;
                 input_key.asciiChar = codeset;
@@ -157,7 +157,7 @@ void do_keyboard_interrupt() {
     if ((previous_input_key.keyStatus.bits & 0b111U) != (input_key.keyStatus.bits & 0b111U))
         set_led();
     is_set_key = true;
-    send_apic_eoi(IRQ_KEYBOARD);
+    send_apic_eoi();
 }
 
 void keyboard_interrupt() {

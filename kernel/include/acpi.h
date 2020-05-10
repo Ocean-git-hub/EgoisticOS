@@ -36,4 +36,6 @@ void init_acpi(void *rsdp);
 
 SDTHeader *get_sdth(const char *signature);
 
+void dump_acpi_info();
+
 #endif //EGOISTICOS_ACPI_H

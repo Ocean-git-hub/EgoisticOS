@@ -8,8 +8,6 @@
                       "push %rbx\n"\
                       "push %rcx\n"\
                       "push %rdx\n"\
-                      "push %rsp\n"\
-                      "push %rbp\n"\
                       "push %rsi\n"\
                       "push %rdi\n"\
                       "push %r8\n"\
@@ -32,13 +30,11 @@
                       "pop %r8\n"\
                       "pop %rdi\n"\
                       "pop %rsi\n"\
-                      "pop %rbp\n"\
-                      "pop %rsp\n"\
                       "pop %rdx\n"\
                       "pop %rcx\n"\
                       "pop %rbx\n"\
                       "pop %rax\n"\
-                      "add $8, %rsp\n"\
+                      "pop %rbp\n"\
                       "iretq\n")
 
 typedef struct __attribute__((packed)) {

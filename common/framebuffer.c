@@ -11,7 +11,7 @@ void init_frame_buffer(FrameBuffer *_frameBuffer) {
 }
 
 bool is_in_screen(uint64_t x, uint64_t y) {
-    return 0 <= x && x < frameBuffer.screenWidth && 0 <= y && y < frameBuffer.screenHeight;
+    return x < frameBuffer.screenWidth && y < frameBuffer.screenHeight;
 }
 
 inline void draw_pixel(uint64_t x, uint64_t y, RGB *rgb) {
@@ -24,6 +24,12 @@ inline void draw_pixel_foreground(uint64_t x, uint64_t y) {
     ((PixelFormat *)
             (frameBuffer.frameBufferBase +
              sizeof(PixelFormat) * (frameBuffer.screenWidth * y + x)))->rgb = foreground_rgb;
+}
+
+inline void draw_pixel_background(uint64_t x, uint64_t y) {
+    ((PixelFormat *)
+            (frameBuffer.frameBufferBase +
+             sizeof(PixelFormat) * (frameBuffer.screenWidth * y + x)))->rgb = background_rgb;
 }
 
 void fill_screen(RGB *rgb) {
@@ -53,7 +59,7 @@ uint64_t get_screen_width() {
 }
 
 void draw_fill_box(uint64_t x0, uint64_t y0, uint64_t x1, uint64_t y1, RGB *rgb) {
-    for (int y = y0; y <= y1; ++y)
-        for (int x = x0; x <= x1; ++x)
+    for (uint64_t y = y0; y <= y1; ++y)
+        for (uint64_t x = x0; x <= x1; ++x)
             draw_pixel(x, y, rgb);
 }

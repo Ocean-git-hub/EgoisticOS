@@ -17,10 +17,21 @@ typedef struct {
     uint64_t memoryMapSize, mapKey, descriptorSize, totalMemory;
 } MemoryMap;
 
+typedef struct __attribute__((packed)) {
+    uint16_t year;
+    uint8_t month;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint32_t nanosecond;
+} Time;
+
 typedef struct {
     MemoryMap memoryMap;
     FrameBuffer frameBuffer;
     void *acpi;
+    Time time;
 } BootParameter;
 
 #endif //EGOISTICOS_BOOTPARMS_H

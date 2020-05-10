@@ -25,6 +25,8 @@ void draw_pixel(uint64_t x, uint64_t y, RGB *rgb);
 
 void draw_pixel_foreground(uint64_t x, uint64_t y);
 
+void draw_pixel_background(uint64_t x, uint64_t y);
+
 void fill_screen(RGB *rgb);
 
 void clear_screen();
