@@ -103,6 +103,21 @@ int8_t s_print_hex32(uint32_t value, char *s) {
     return j;
 }
 
+void s_print_double(double value, char *s) {
+    uint64_t bits = *(uint64_t *) &value;
+    if (bits >> 63U) {
+        *s++ = '-';
+        value *= -1;
+    }
+    uint64_t before_decimal_point = value;
+    s += s_print_unsigned_decimal(before_decimal_point, s);
+    *s++ = '.';
+    uint64_t after_decimal_point6 = value * 1000000 - before_decimal_point * 1000000 + 1000000;
+    s_print_unsigned_decimal(after_decimal_point6, s);
+    for (int i = 0; i < 7; ++i)
+        s[i] = s[i + 1];
+}
+
 int64_t power(uint8_t x, uint8_t y) {
     uint8_t ret_x = 1;
     for (uint8_t i = 0; i < y; ++i)
@@ -121,6 +136,10 @@ void kernel_printf(const char *format, ...) {
     while (*format != '\0') {
         if (*format != '%') {
             kernel_print_char(*format++);
+            continue;
+        } else if (format[1] == '%') {
+            kernel_print_char(*format++);
+            format++;
             continue;
         }
         format++;
@@ -156,6 +175,10 @@ void kernel_printf(const char *format, ...) {
                 n_reading_zero = reading_zero - s_print_hex32(va_arg(args, int32_t), buf);
                 for (int j = 0; j < n_reading_zero; ++j)
                     kernel_print_char('0');
+                kernel_print_string(buf);
+                break;
+            case 'f':
+                s_print_double(va_arg(args, double), buf);
                 kernel_print_string(buf);
                 break;
             case 'l':

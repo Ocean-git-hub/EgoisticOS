@@ -3,9 +3,9 @@
 #include <acpi.h>
 #include <graphics.h>
 #include <stdbool.h>
-#include <architecture/apic.h>
-#include <architecture/interrupt.h>
-#include <architecture/io.h>
+#include <architecture/x64/apic.h>
+#include <architecture/x64/interrupt.h>
+#include <architecture/x64/io.h>
 
 #define HPET_REGISTER_OFFSET_GENERAL_CAPABILITIES_ID 0
 #define HPET_REGISTER_OFFSET_GENERAL_CONFIGURATION 0x10

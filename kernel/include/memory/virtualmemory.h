@@ -1,0 +1,6 @@
+#ifndef EGOISTICOS_VIRTUALMEMORY_H
+#define EGOISTICOS_VIRTUALMEMORY_H
+
+void init_virtual_memory();
+
+#endif //EGOISTICOS_VIRTUALMEMORY_H

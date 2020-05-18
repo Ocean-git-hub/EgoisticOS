@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 #include <acpi.h>
-#include <architecture/pic.h>
+#include <architecture/x64/pic.h>
 
 #define INTERRUPT_NUMBER_BASE 0x20
 

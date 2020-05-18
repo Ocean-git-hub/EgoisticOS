@@ -1,8 +1,8 @@
-#include <architecture/apic.h>
+#include <architecture/x64/apic.h>
 
 #include <stdbool.h>
-#include <architecture/msr.h>
-#include <architecture/pic.h>
+#include <architecture/x64/msr.h>
+#include <architecture/x64/pic.h>
 #include <graphics.h>
 
 #define CPUID_EAX1_X2APIC_SUPPORT_BIT 0x200000U //bit 21
@@ -146,12 +146,12 @@ void init_apic(SDTHeader *apic_header) {
     madt = (MADT *) apic_header;
     if (madt->Flags.PCAT_COMPAT == 1)
         mask_all_pic_irq();
-    IA32APICBaseMSRLayout msr_apic = (IA32APICBaseMSRLayout) read_msr(MSR_IA32_APIC_BASE);
-    if (msr_apic.xAPICGlobalEnable == 0) {
-        msr_apic.xAPICGlobalEnable = 1;
-        write_msr(MSR_IA32_APIC_BASE, msr_apic.bits);
+    MSR msr_apic = read_msr(MSR_REGISTER_ADDRESS_IA32_APIC_BASE);
+    if (msr_apic.IA32APICBaseMSRLayout.xAPICGlobalEnable == 0) {
+        msr_apic.IA32APICBaseMSRLayout.xAPICGlobalEnable = 1;
+        write_msr(MSR_REGISTER_ADDRESS_IA32_APIC_BASE, msr_apic);
     }
-    local_apic_base = msr_apic.APICBaseAddress << 12U;
+    local_apic_base = msr_apic.IA32APICBaseMSRLayout.APICBaseAddress << 12U;
     uint8_t *madt_p = (uint8_t *) madt;
     InterruptControllerStructureHeader *header;
     for (uint64_t i = sizeof(MADT); i < madt->header.length; i += header->length) {

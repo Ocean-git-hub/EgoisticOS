@@ -18,6 +18,7 @@ typedef struct {
 } MemoryMap;
 
 typedef struct {
+    uint64_t kernelEndAddress;
     MemoryMap memoryMap;
     FrameBuffer frameBuffer;
     void *acpi;

@@ -1,7 +1,7 @@
-#include <architecture/interrupt.h>
+#include <architecture/x64/interrupt.h>
 
 #include <graphics.h>
-#include <architecture/gdt.h>
+#include <architecture/x64/gdt.h>
 
 #define MAX_NUM_IDT_DESCRIPTOR 256
 

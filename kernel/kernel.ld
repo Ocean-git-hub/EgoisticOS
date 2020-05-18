@@ -5,9 +5,9 @@ SECTIONS {
     .bss_start : {QUAD(__bss_start)}
     .bss_size : {QUAD(__bss_end - __bss_start)}
     .text : {*(.text)}
-    .data : {*(.data)}
-    .rodata : {*(.rodata)}
     __bss_start = .;
     .bss : {*(.bss)}
     __bss_end = .;
+    .data : {*(.data)}
+    .rodata : {*(.rodata)}
 }

@@ -1,4 +1,4 @@
-#include <architecture/gdt.h>
+#include <architecture/x64/gdt.h>
 
 #include <stdint.h>
 

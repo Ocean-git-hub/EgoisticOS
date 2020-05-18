@@ -2,7 +2,7 @@
 #define EGOISTICOS_IO_H
 
 #include <stdint.h>
-#include <architecture/ioport.h>
+#include <architecture/x64/ioport.h>
 
 uint8_t io_read_b(uint16_t address);
 

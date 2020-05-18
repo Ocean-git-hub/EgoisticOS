@@ -1,9 +1,9 @@
-#include <architecture/pic.h>
+#include <architecture/x64/pic.h>
 
 #include <stdbool.h>
 
-#include <architecture/ioport.h>
-#include <architecture/io.h>
+#include <architecture/x64/ioport.h>
+#include <architecture/x64/io.h>
 
 #include <graphics.h>
 

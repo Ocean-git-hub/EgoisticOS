@@ -35,6 +35,7 @@ void timer0_interrupt() {
 }
 
 void init_timer() {
+    init_hpet(get_sdth("HPET"));
     uint8_t timer0_irq_no;
     set_timer(0, 1 * MILLI_PER_MICRO, 1, &timer0_irq_no, timer0_interrupt);
 }

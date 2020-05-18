@@ -1,8 +1,8 @@
-#include <architecture/msr.h>
+#include <architecture/x64/msr.h>
 
 #include <stdint.h>
 
-uint64_t read_msr(uint32_t address) {
+MSR read_msr(uint32_t address) {
     union {
         uint64_t bits;
         struct {
@@ -13,10 +13,10 @@ uint64_t read_msr(uint32_t address) {
     __asm__ volatile ("mov %2, %%ecx\n"
                       "rdmsr\n"
     :"=d"(eax_edx.edx), "=a"(eax_edx.eax):"m"(address));
-    return eax_edx.bits;
+    return (MSR) eax_edx.bits;
 }
 
-void write_msr(uint32_t address, uint64_t value) {
+void write_msr(uint32_t address, MSR value) {
     union {
         uint64_t bits;
         struct {
@@ -24,7 +24,7 @@ void write_msr(uint32_t address, uint64_t value) {
             uint32_t edx;
         };
     } eax_edx;
-    eax_edx.bits = value;
+    eax_edx.bits = value.bits;
     __asm__ volatile ("mov %0, %%edx\n"
                       "mov %1, %%eax\n"
                       "mov %2, %%ecx\n"

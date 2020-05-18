@@ -16,6 +16,7 @@ const char COMMAND_LINE_ARGUMENT[] = "qemu-system-x86_64 -m 8G -smp 4 -drive if=
 void copy_file(const char *in, const char *out) {
     int in_fd = open(in, O_RDONLY);
     assert(in_fd != -1);
+    unlink(out);
     int out_fd = open(out, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
     assert(out_fd != -1);
 
@@ -26,7 +27,7 @@ void copy_file(const char *in, const char *out) {
     printf("%d bytes were written to %s from %s\n", count, out, in);
 }
 
-static char *command_list[MAX_BUFFER_SIZE];
+char *command_list[MAX_BUFFER_SIZE];
 
 int parse_command(const char *command_string) {
     char command_buffer[MAX_BUFFER_SIZE];

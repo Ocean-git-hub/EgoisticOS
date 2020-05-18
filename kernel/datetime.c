@@ -15,7 +15,7 @@ void increment_time() {
         if (time.minute >= 60) {
             time.hour++;
             time.minute = 0;
-            if (time.hour > 24) {
+            if (time.hour >= 24) {
                 get_rtc_datetime(&time.year, &time.month, &time.day, &time.hour, &time.minute, &time.second);
             }
         }

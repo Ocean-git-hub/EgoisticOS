@@ -77,7 +77,7 @@ void show_memory_map() {
     system_table->BootServices->EFI_FREE_POOL(memory_map.memoryDescriptorBase);
 }
 
-uint64_t get_total_memory_by_byte(MemoryMap *memory_map) {
+uint64_t get_total_memory_pages(MemoryMap *memory_map) {
     uint64_t total_memory = 0;
     MemoryDescriptor *memory_descriptor = memory_map->memoryDescriptorBase;
     for (uint32_t i = 0; i < memory_map->memoryMapSize / memory_map->descriptorSize; ++i) {
@@ -174,6 +174,7 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     uint64_t kernel_address = get_free_page_address(kernel_size + stack_size, &memory_map);
     if (kernel_address == 0)
         unsupported();
+    uint64_t kernel_file_end_address = kernel_address + kernel_size;
     print_string(L"[*] There are free pages to load kernel\n\r[*] Kernel Start: 0x");
     hex_dump(kernel_address, 16);
     print_string_n(L"");
@@ -184,13 +185,14 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
     read_file_to_address(kernel_address, kernel_name);
     print_string_n(L"[*] Loading kernel successfully");
 
-    BootParameter bootParameter;
-    set_boot_parameters(&bootParameter);
+    BootParameter boot_parameter;
+    set_boot_parameters(&boot_parameter);
+    boot_parameter.kernelEndAddress = kernel_file_end_address;
     if (is_ek(kernel_address)) {
         print_string_n(L"[*] This file is an egoistic kernel file.");
         EKHeader *ek_header = (EKHeader *) kernel_address;
         system_table->BootServices->EFI_SET_MEM(kernel_address + ek_header->bssStart, ek_header->bssSize, 0);
-        uint64_t kernel_arg1 = (uint64_t) &bootParameter;
+        uint64_t kernel_arg1 = (uint64_t) &boot_parameter;
         uint64_t kernel_start = (uint64_t) &ek_header->text;
         uint64_t stack_base = (kernel_address + stack_size) / 16 * 16;
         print_string(L"[*] Kernel arg1: 0x");
@@ -202,48 +204,12 @@ EFI_STATUS efi_main(void *image_handle, EFI_SYSTEM_TABLE *_system_table) {
         print_string_n(L"\r\nPress any key to continue.");
         get_input_key();
 
-        exit_boot_services(&bootParameter.memoryMap, image_handle);
-        bootParameter.memoryMap.totalMemory = get_total_memory_by_byte(&bootParameter.memoryMap);
+        exit_boot_services(&boot_parameter.memoryMap, image_handle);
+        boot_parameter.memoryMap.totalMemory = get_total_memory_pages(&boot_parameter.memoryMap);
         __asm__ volatile ("mov %0, %%rdi\n"
-                          "mov %1, %%rsp\n"
+                          "mov %1, %%rsp\n" // stack_base was set 16-byte alignment
                           "jmp *%2\n"
         ::"m"(kernel_arg1), "m"(stack_base), "m"(kernel_start));
-        /*} else if (is_elf(kernel_address)) {
-            print_string_n(L"This is an elf file.");
-
-            Elf64_Shdr *bss_section = get_elf_section((Elf64_Ehdr *) kernel_address, ".bss");
-            if (bss_section == NULL) {
-                print_string_n(L"[!] Couldn't find .bss section.");
-            } else {
-                print_string_n(L"[*] Find bss");
-                print_string(L".bss sh_size: ");
-                print_decimal(bss_section->sh_size, 3, true);
-                print_string(L".bss sh_offset: ");
-                hex_dump(bss_section->sh_offset, 16);
-                system_table->BootServices->EFI_SET_MEM((void *) (kernel_address + bss_section->sh_offset),
-                                                        bss_section->sh_size, 0);
-            }
-
-            Elf64_Shdr *init_section = get_elf_section((Elf64_Ehdr *) kernel_address, ".init");
-            if (init_section == NULL) {
-                print_string_n(L"\r\n[!] Couldn't find .init section.");
-            } else {
-                ((void (*)()) (kernel_address + init_section->sh_offset))();
-            }
-
-            while (true);
-            exit_boot_services(&bootParameter.memoryMap, image_handle);
-            uint64_t kernel_arg1 = (uint64_t) &bootParameter;
-            uint64_t kernel_start = get_text_start_for_elf((Elf64_Ehdr *) kernel_address);
-            uint64_t stack_base = kernel_address + 1024 * 1024;
-            __asm__ volatile ("mov %0, %%rdi\n"
-                              "mov %1, %%rsp\n"
-                              "jmp *%2\n"::"m"(kernel_arg1), "m"(stack_base), "m"(kernel_start));
-        } else if (is_pe64(kernel_address)) {
-            print_string_n(L"This is a pe32+ file.");
-            uint64_t kernel_start = get_text_start_for_pe64((IMAGE_DOS_HEADER *) kernel_address);
-            exit_boot_services(&bootParameter.memoryMap, image_handle);
-            ((void (*)(BootParameter *)) kernel_start)(&bootParameter);*/
     } else
         unsupported();
     return EFI_SUCCESS;
