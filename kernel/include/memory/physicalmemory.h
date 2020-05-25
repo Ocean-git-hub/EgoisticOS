@@ -14,14 +14,18 @@ uint64_t get_physical_allocated_memory_size();
 
 uint64_t get_physical_total_memory_size();
 
-void *allocate_physical_memory();
+void *allocate_physical_memory_page();
 
-void free_physical_memory(void *pointer);
+void free_physical_memory_page(void *pointer);
 
 void print_physical_memory_usage();
 
 void *allocate_kernel_heap_page();
 
 void free_kernel_heap_page(void *pointer);
+
+void *allocate_physical_memory(uint64_t size);
+
+void free_physical_memory(void *pointer, uint64_t size);
 
 #endif //EGOISTICOS_PHYSICALMEMORY_H

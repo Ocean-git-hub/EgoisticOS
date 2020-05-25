@@ -38,13 +38,11 @@ typedef union {
             uint64_t PWT: 1;
             uint64_t PCD: 1;
             uint64_t reserved2: 7;
-            uint64_t PML4: 40;
-            uint64_t reserved3: 12;
+            uint64_t PML4: 52;
         } PCIDD;
         struct {
             uint64_t PCID: 12;
-            uint64_t PML4: 40;
-            uint64_t reserved3: 12;
+            uint64_t PML4: 52;
         } PCIDE;
     } CR3;
     struct {

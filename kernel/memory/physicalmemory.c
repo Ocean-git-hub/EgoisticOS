@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <graphics.h>
+#include <keyboard.h>
 
 #define MEMORY_DESCRIPTOR_TYPE_GENERAL_USE 7
 #define PHYSICAL_BLOCK_SIZE (4 * 1024)
@@ -86,7 +87,7 @@ uint64_t get_physical_total_memory_size() {
     return physical_memory_info.totalMemorySize;
 }
 
-int64_t get_free_page_from_beginning(PhysicalMemoryInfo *memory_info) {
+int64_t get_free_page_no_from_beginning(PhysicalMemoryInfo *memory_info) {
     for (uint64_t i = 0; i < memory_info->memoryMapSize / 8; ++i) {
         if (memory_info->memoryMap[i] != 0xffffffffffffffff) {
             if (((uint32_t *) memory_info->memoryMap)[i * 2] != 0xffffffff) {
@@ -115,10 +116,74 @@ int64_t get_free_page_from_beginning(PhysicalMemoryInfo *memory_info) {
     return -1;
 }
 
-void *allocate_physical_memory() {
+int64_t get_free_page_no(PhysicalMemoryInfo *memory_info, uint64_t num_pages) {
+    if (num_pages == 0)
+        return -1;
+    bool is_find;
+    for (uint64_t i = 0; i < memory_info->memoryMapSize / 8; ++i) {
+        if (memory_info->memoryMap[i] != 0xffffffffffffffff) {
+            if (((uint32_t *) memory_info->memoryMap)[i * 2] != 0xffffffff) {
+                if (((uint16_t *) memory_info->memoryMap)[i * 4] != 0xffff) {
+                    for (int j = 0; j < 16; ++j) {
+                        is_find = true;
+                        for (uint64_t k = 0; k < num_pages; ++k)
+                            if (is_allocated_page_memory_map_bitmap(memory_info->memoryMap, i * 64 + j + k)) {
+                                is_find = false;
+                                j += k;
+                                break;
+                            }
+                        if (is_find)
+                            return i * 64 + j;
+                    }
+                } else {
+                    for (int j = 16; j < 32; ++j) {
+                        is_find = true;
+                        for (uint64_t k = 0; k < num_pages; ++k)
+                            if (is_allocated_page_memory_map_bitmap(memory_info->memoryMap, i * 64 + j + k)) {
+                                is_find = false;
+                                j += k;
+                                break;
+                            }
+                        if (is_find)
+                            return i * 64 + j;
+                    }
+                }
+            } else {
+                if (((uint16_t *) memory_info->memoryMap)[i * 4 + 2] != 0xffff) {
+                    for (int j = 32; j < 48; ++j) {
+                        is_find = true;
+                        for (uint64_t k = 0; k < num_pages; ++k)
+                            if (is_allocated_page_memory_map_bitmap(memory_info->memoryMap, i * 64 + j + k)) {
+                                is_find = false;
+                                j += k;
+                                break;
+                            }
+                        if (is_find)
+                            return i * 64 + j;
+                    }
+                } else {
+                    for (int j = 48; j < 64; ++j) {
+                        is_find = true;
+                        for (uint64_t k = 0; k < num_pages; ++k)
+                            if (is_allocated_page_memory_map_bitmap(memory_info->memoryMap, i * 64 + j + k)) {
+                                is_find = false;
+                                j += k;
+                                break;
+                            }
+                        if (is_find)
+                            return i * 64 + j;
+                    }
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+void *allocate_physical_memory_page() {
     if (physical_memory_info.numFreePages == 0)
         return 0;
-    int64_t free_page_no = get_free_page_from_beginning(&physical_memory_info);
+    int64_t free_page_no = get_free_page_no_from_beginning(&physical_memory_info);
     if (free_page_no == -1)
         return 0;
     physical_memory_info.numAllocatedPages++;
@@ -127,11 +192,32 @@ void *allocate_physical_memory() {
     return (void *) (free_page_no * physical_memory_info.sizePerPage);
 }
 
-void free_physical_memory(void *pointer) {
+void free_physical_memory_page(void *pointer) {
     physical_memory_info.numAllocatedPages--;
     physical_memory_info.numFreePages++;
     set_memory_map_bitmap(physical_memory_info.memoryMap, false,
                           (uint64_t) pointer / physical_memory_info.sizePerPage);
+}
+
+void *allocate_physical_memory(uint64_t size) {
+    if (physical_memory_info.numFreePages == 0 || size == 0)
+        return 0;
+    uint64_t num_pages = (size + physical_memory_info.sizePerPage - 1) / physical_memory_info.sizePerPage;
+    int64_t free_page_no = get_free_page_no(&physical_memory_info, num_pages);
+    if (free_page_no == -1)
+        return 0;
+    for (uint64_t i = 0; i < num_pages; ++i) {
+        physical_memory_info.numAllocatedPages++;
+        physical_memory_info.numFreePages--;
+        set_memory_map_bitmap(physical_memory_info.memoryMap, true, free_page_no + i);
+    }
+    return (void *) (free_page_no * physical_memory_info.sizePerPage);
+}
+
+void free_physical_memory(void *pointer, uint64_t size) {
+    uint64_t num_pages = (size + physical_memory_info.sizePerPage - 1) / physical_memory_info.sizePerPage;
+    for (uint64_t i = 0; i < num_pages; ++i)
+        free_physical_memory_page(pointer + physical_memory_info.sizePerPage * i);
 }
 
 void print_physical_memory_usage() {
@@ -173,7 +259,7 @@ void init_kernel_heap() {
 }
 
 void *allocate_kernel_heap_page() {
-    int64_t free_page_no = get_free_page_from_beginning(&kernel_heap_info);
+    int64_t free_page_no = get_free_page_no_from_beginning(&kernel_heap_info);
     if (free_page_no == -1)
         return 0;
     uint64_t rsp;

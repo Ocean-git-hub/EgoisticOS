@@ -46,9 +46,6 @@ _Noreturn void start_kernel(BootParameter *bootParameter) {
     dump_hpet_info();
     dump_acpi_info();
 
-    uint32_t eax, ebx, ecx, edx;
-    read_cpuid(0x80000008, &eax, &ebx, &ecx, &edx);
-    kernel_printf("a:%08x,b:%08x,c:%08x,d:%08x\n", eax, ebx, ecx, edx);
     shell();
 
     while (true)

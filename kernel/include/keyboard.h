@@ -64,8 +64,6 @@ typedef struct {
 
 void do_keyboard_interrupt();
 
-uint8_t get_scan_code();
-
 char get_char();
 
 void init_keyboard();
