@@ -32,14 +32,6 @@ void set_interrupt_descriptor(uint8_t index, void *handler, uint8_t present) {
     idt[index].reserved = 0;
 }
 
-//void exception_dump_cpu_context(CpuContext *cpu_context) {
-//    kernel_printf("CS:SS:SD %04x:%04x:%04x RBP:RSP %016lx:%016lx\n", cpu_context->cs, cpu_context->ss, cpu_context->ds, cpu_context->rbp, cpu_context->rsp);
-//    kernel_printf("ABCD:X   %016lx %016lx %016lx %016lx\n", cpu_context->rax, cpu_context->rbx, cpu_context->rcx, cpu_context->rdx);
-//    kernel_printf("RIP SD:I %016lx %016lx %016lx\n", cpu_context->rip, cpu_context->rsi, cpu_context->rdi);
-//    kernel_printf("R8-      %016lx %016lx %016lx %016lx\n", cpu_context->r8, cpu_context->r9, cpu_context->r10, cpu_context->r11);
-//    kernel_printf("R12-     %016lx %016lx %016lx %016lx\n", cpu_context->r12, cpu_context->r13, cpu_context->r14, cpu_context->r15);
-//}
-
 void DE() {
     kernel_printf("[!] DE has occurred.\n");
     while (1);
@@ -106,9 +98,7 @@ void SSF() {
 }
 
 void GPF() {
-    //set_cpu_context();
     kernel_printf("[!] GPF has occurred.\n");
-    //exception_dump_cpu_context(&context);
     while (1);
 }
 

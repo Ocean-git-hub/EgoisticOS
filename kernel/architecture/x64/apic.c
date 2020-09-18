@@ -1,9 +1,6 @@
 #include <architecture/x64/apic.h>
 
-#include <stdbool.h>
 #include <architecture/x64/msr.h>
-#include <architecture/x64/pic.h>
-#include <graphics.h>
 
 #define CPUID_EAX1_X2APIC_SUPPORT_BIT 0x200000U //bit 21
 

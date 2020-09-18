@@ -15,6 +15,10 @@ typedef struct {
 
 void init_datetime();
 
+void set_datetime(DateTime *dateTime);
+
+void set_rtc_time();
+
 DateTime get_datetime();
 
 #endif //EGOISTICOS_DATETIME_H

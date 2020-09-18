@@ -1,6 +1,5 @@
 #include "../common/include/framebuffer.h"
 #include "../common/include/bootparms.h"
-#include <stdint.h>
 #include <stdbool.h>
 #include <graphics.h>
 #include <x64.h>

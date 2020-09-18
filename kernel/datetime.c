@@ -5,6 +5,7 @@
 #include <graphics.h>
 
 DateTime time;
+bool is_user_time;
 
 void increment_time() {
     time.second++;
@@ -16,7 +17,8 @@ void increment_time() {
             time.hour++;
             time.minute = 0;
             if (time.hour >= 24) {
-                get_rtc_datetime(&time.year, &time.month, &time.day, &time.hour, &time.minute, &time.second);
+                if (!is_user_time)
+                    get_rtc_datetime(&time.year, &time.month, &time.day, &time.hour, &time.minute, &time.second);
             }
         }
     }
@@ -27,6 +29,16 @@ void increment_time() {
 void init_datetime() {
     get_rtc_datetime(&time.year, &time.month, &time.day, &time.hour, &time.minute, &time.second);
     add_timer_observer(Second, increment_time);
+}
+
+void set_datetime(DateTime *dateTime) {
+    time = *dateTime;
+    is_user_time = true;
+}
+
+void set_rtc_time() {
+    get_rtc_datetime(&time.year, &time.month, &time.day, &time.hour, &time.minute, &time.second);
+    is_user_time = false;
 }
 
 DateTime get_datetime() {

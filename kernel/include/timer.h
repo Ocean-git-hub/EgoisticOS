@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 typedef enum {
-    MilliSecond,
+    TwentyMilliSecond,
     Second
 } TimerType;
 

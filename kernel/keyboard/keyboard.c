@@ -1,9 +1,6 @@
 #include <keyboard.h>
 
-#include <stdint.h>
 #include <x64.h>
-#include <keyboard/kbencoder.h>
-#include <keyboard/kbcontroller.h>
 #include <graphics.h>
 
 bool is_set_key;
