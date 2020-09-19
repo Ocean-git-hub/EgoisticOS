@@ -2,7 +2,6 @@
 
 #include <rtc.h>
 #include <timer.h>
-#include <graphics.h>
 
 DateTime time;
 bool is_user_time;
@@ -22,8 +21,6 @@ void increment_time() {
             }
         }
     }
-    printf_coordinate(get_screen_width() - 8 * 19, 0, "%04u/%02u/%02u %02u:%02u:%02u", time.year,
-                      time.month, time.day, time.hour, time.minute, time.second);
 }
 
 void init_datetime() {

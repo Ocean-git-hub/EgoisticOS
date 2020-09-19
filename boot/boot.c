@@ -113,6 +113,7 @@ void set_boot_parameters(BootParameter *boot_parameter) {
     boot_parameter->frameBuffer.screenWidth = graphics_output_protocol->Mode->Info->HorizontalResolution;
     EFI_GUID acpi_guid = EFI_ACPI_20_TABLE_GUID;
     boot_parameter->acpi = get_configuration_table(&acpi_guid);
+    boot_parameter->reset_system = system_table->RuntimeServices->EFI_RESET_SYSTEM;
     if (boot_parameter->acpi == NULL)
         print_string_n(L"[!] Couldn't find ACPI table.");
 }
