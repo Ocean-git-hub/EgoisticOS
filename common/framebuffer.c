@@ -1,8 +1,8 @@
 #include "include/framebuffer.h"
 
 FrameBuffer frameBuffer;
-RGB background_rgb;
-RGB foreground_rgb = {255, 255, 255};
+RGB background_rgb = {255, 255, 255};
+RGB foreground_rgb;
 
 void init_frame_buffer(FrameBuffer *_frameBuffer) {
     frameBuffer = *_frameBuffer;

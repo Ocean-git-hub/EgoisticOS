@@ -9,7 +9,16 @@
 #include <memory.h>
 #include <shell.h>
 #include <power.h>
-#include <desktop.h>
+#include <scheduler.h>
+#include <graphics.h>
+#include <gui/desktop.h>
+
+#include <gui/frame.h>
+#include <hpet.h>
+
+void f_task_a();
+
+void f_task_b();
 
 _Noreturn void start_kernel(BootParameter *bootParameter) {
     /*
@@ -27,6 +36,7 @@ _Noreturn void start_kernel(BootParameter *bootParameter) {
     init_interrupt();
     init_acpi(bootParameter->acpi);
     init_apic(get_sdth("APIC"));
+    init_hpet(get_sdth("HPET"));
     init_timer();
     init_datetime();
     init_keyboard();
@@ -34,6 +44,7 @@ _Noreturn void start_kernel(BootParameter *bootParameter) {
     init_memory(&bootParameter->memoryMap, bootParameter->kernelEndAddress);
     init_power(bootParameter->reset_system);
     init_desktop();
+    init_scheduler();
 
     shell();
 

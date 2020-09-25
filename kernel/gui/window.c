@@ -1,6 +1,6 @@
-#include <window.h>
+#include <gui/window.h>
 
-#include "../common/include/framebuffer.h"
+#include "../../common/include/framebuffer.h"
 #include <graphics.h>
 #include <font.h>
 
@@ -21,16 +21,21 @@ void window_create(Window *window, uint64_t x, uint64_t y, uint64_t w, uint64_t 
     window->background.blue = window->background.green = window->background.red = 255;
     window->foreground.blue = window->foreground.green = window->foreground.red = 0;
     window->parentWindow = &root_window;
-    for (uint64_t i = 0; i < MAX_NUM_WINDOWS; ++i)
+    for (uint64_t i = 0; i < MAX_CHILD_WINDOWS; ++i)
         window->childWindows[i] = 0;
 }
 
 void window_create_sub_window(Window *window, Window *parent_window, uint64_t x, uint64_t y, uint64_t w, uint64_t h) {
     window_create(window, x, y, w, h);
     window->parentWindow = parent_window;
+    for (uint64_t i = 0; i < MAX_CHILD_WINDOWS; ++i)
+        if (parent_window->childWindows[i] == 0) {
+            parent_window->childWindows[i] = window;
+            break;
+        }
 }
 
-void window_set_RGB(Window *window, RGB *rgb_fore, const RGB *rgb_back) {
+void window_set_RGB(Window *window, const RGB *rgb_fore, const RGB *rgb_back) {
     window->foreground = *rgb_fore;
     window->background = *rgb_back;
 }
@@ -64,6 +69,24 @@ void window_set_text(Window *window, char *string) {
     window_clear(window);
     uint64_t x0, _x0, y0, x1, y1;
     window_get_absolutely_position(window, &x0, &x1, &y0, &y1);
+    _x0 = x0;
+    while (*string != '\0') {
+        print_char_coordinate_RGB(*string++, x0, y0, &window->foreground);
+        x0 += FONT_WIDTH;
+        if (x0 + FONT_WIDTH > x1) {
+            x0 = _x0;
+            y0 += FONT_HEIGHT;
+            if (y0 + FONT_HEIGHT > y1)
+                return;
+        }
+    }
+}
+
+void window_set_text_position(Window *window, char *string, uint64_t x, uint64_t y) {
+    window_clear(window);
+    uint64_t x0, _x0, y0, x1, y1;
+    window_get_absolutely_position(window, &x0, &x1, &y0, &y1);
+    x0 += x, y0 += y;
     _x0 = x0;
     while (*string != '\0') {
         print_char_coordinate_RGB(*string++, x0, y0, &window->foreground);

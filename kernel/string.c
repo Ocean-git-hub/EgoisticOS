@@ -77,6 +77,8 @@ int8_t s_print_hex64(uint64_t value, char *s) {
         tmp[i] = unit_val + ((unit_val < 0xa) ? '0' : 'A' - 0xa);
         value >>= 4U;
     }
+    if (i == 0)
+        s[j++] = '0';
     while (i > 0)
         s[j++] = tmp[--i];
     s[j] = '\0';
@@ -92,6 +94,8 @@ int8_t s_print_hex32(uint32_t value, char *s) {
         tmp[i] = unit_val + ((unit_val < 0xa) ? '0' : 'A' - 0xa);
         value >>= 4U;
     }
+    if (i == 0)
+        s[j++] = '0';
     while (i > 0)
         s[j++] = tmp[--i];
     s[j] = '\0';

@@ -1,9 +1,9 @@
-#include <desktop.h>
+#include <gui/desktop.h>
 
-#include "../common/include/framebuffer.h"
+#include "../../common/include/framebuffer.h"
 #include <timer.h>
 #include <datetime.h>
-#include <window.h>
+#include <gui/window.h>
 #include <string.h>
 
 #define UNDER_PANEL_H 30

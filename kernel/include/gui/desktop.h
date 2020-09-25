@@ -1,7 +1,7 @@
 #ifndef EGOISTICOS_DESKTOP_H
 #define EGOISTICOS_DESKTOP_H
 
-#include <window.h>
+#include <gui/window.h>
 
 typedef struct WindowHandler WindowHandler;
 

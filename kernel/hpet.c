@@ -26,7 +26,12 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
     SDTHeader header;
-    uint32_t eventTimerBlockID;
+    uint8_t hardwareRevId;
+    uint8_t comparatorCount:5;
+    uint8_t counterSize:1;
+    uint8_t reserved:1;
+    uint8_t legacyReplacement:1;
+    uint16_t pciVendor_id;
     ACPIAddressFormat ACPIAddressFormat;
     uint8_t HPETNumber;
     uint16_t mainCounterMinimumClockTickInPeriodicMode;
@@ -100,11 +105,11 @@ void write_hpet_register(uint32_t offset, uint64_t value) {
 }
 
 uint64_t read_hpet_timer_n(uint8_t timer_n, uint32_t offset) {
-    return read_hpet_register(offset + 20 * timer_n);
+    return read_hpet_register(offset + 0x20 * timer_n);
 }
 
 void write_hpet_timer_n(uint8_t timer_n, uint32_t offset, uint64_t value) {
-    write_hpet_register(offset + 20 * timer_n, value);
+    write_hpet_register(offset + 0x20 * timer_n, value);
 }
 
 void disable_timer() {
@@ -149,12 +154,16 @@ bool set_timer(uint8_t timer_no, uint64_t micro_second, bool periodic_mode, uint
     TimerNConfigurationCapabilityRegister tnccr =
             (TimerNConfigurationCapabilityRegister)
                     read_hpet_timer_n(timer_no, HPET_REGISTER_OFFSET_TIMER_CONFIGURATION_CAPABILITY_BASE);
+    kernel_printf("0x%lx\n", tnccr.bits);
+    kernel_printf("comparators: %u\n", hpetdt->comparatorCount);
+    kernel_printf("GIS: 0x%lx\n", read_hpet_register(HPET_REGISTER_OFFSET_GENERAL_INTERRUPT_STATUS));
     uint8_t irq_no = 0;
     uint32_t int_route_cap_tmp = tnccr.intRouteCap;
-    while ((int_route_cap_tmp & 1U) == 0) {
-        irq_no++;
-        int_route_cap_tmp >>= 1U;
-    }
+    if (int_route_cap_tmp != 0)
+        while ((int_route_cap_tmp & 1U) == 0) {
+            irq_no++;
+            int_route_cap_tmp >>= 1U;
+        }
     tnccr.intTypeCnf = 0;
     tnccr.intEnbCnf = 1;
     tnccr.typeCnf = periodic_mode;
